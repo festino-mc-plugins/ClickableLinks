@@ -64,6 +64,7 @@ public class ChatHandler implements Listener
 			
 			String linkStr = link.getString();
 			String linkClick = applyBrowserEncoding(linkStr);
+			System.out.println(linkClick);
 			if (!link.hasProtocol)
 				linkClick = "https://" + linkClick;
 			command += ",{\"text\":\"" + linkStr + "\",\"underlined\":true,"
@@ -92,7 +93,8 @@ public class ChatHandler implements Listener
 	{
 		try {
 			String r = URLEncoder.encode(str, StandardCharsets.UTF_8.toString());
-			return r.replace("%2F", "/");
+			// TODO optimize partial decode
+			return r.replace("%2F", "/").replace("%3A", ":").replace("%3F", "?").replace("%3D", "=").replace("%26", "&").replace("%2B", "+").replace("%25", "%");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return str;
