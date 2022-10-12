@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -59,16 +60,23 @@ public class ChatHandler implements Listener
 		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(format);
 		int prevEnd = 0;
+		String lastColor = ChatColor.RESET.toString();
 	    while (matcher.find())
 	    {
 	        int start = matcher.start();
 	        int end = matcher.end();
 	        command.append(tryWrap(format.substring(prevEnd, start)));
+	        
+	        int colorIndex = format.lastIndexOf('§', start);
+	        if (0 <= colorIndex && colorIndex + 2 <= end)
+	        	lastColor = format.substring(colorIndex, colorIndex + 2);
+	        
 	        String placeholder = format.substring(start, end);
 	        if (placeholder.equals(PLACEHOLDER_NAME))
 				appendPlayer(command, event.getPlayer());
 	        if (placeholder.equals(PLACEHOLDER_MESSAGE))
-				appendMessage(command, message, link);
+				appendMessage(command, message, link, lastColor);
+	        
 	        prevEnd = end;
 	    }
         command.append(tryWrap(format.substring(prevEnd)));
@@ -89,10 +97,15 @@ public class ChatHandler implements Listener
 		
 		event.setCancelled(true);
 	}
+
 	
 	private static String tryWrap(String str)
 	{
-		return str == "" ? "" : "{\"text\":\"" + str + "\"},";
+		return tryWrap(str, "");
+	}
+	private static String tryWrap(String str, String color)
+	{
+		return str == "" ? "" : "{\"text\":\"" + color + str + "\"},";
 	}
 	
 	private void appendPlayer(StringBuilder command, Player player)
@@ -105,28 +118,28 @@ public class ChatHandler implements Listener
 		command.append("},");
 	}
 	
-	private void appendMessage(StringBuilder command, String message, Link firstLink)
+	private void appendMessage(StringBuilder command, String message, Link firstLink, String color)
 	{
 		int lastIndex = 0;
 		Link link = firstLink;
 		while (link != null)
 		{
-			if (lastIndex < link.beginIndex)
-				command.append(tryWrap(message.substring(lastIndex, link.beginIndex)));
+			if (lastIndex < link.beginIndex) {
+				command.append(tryWrap(message.substring(lastIndex, link.beginIndex), color));
+			}
 			
 			String linkStr = link.getString();
 			String linkClick = applyBrowserEncoding(linkStr);
 			if (!link.hasProtocol)
 				linkClick = "https://" + linkClick;
-			command.append("{\"text\":\"" + linkStr + "\",\"underlined\":true,"
+			command.append("{\"text\":\"" + color + ChatColor.UNDERLINE + linkStr + "\","
 					+ "\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + linkClick + "\"}},");
 			
 			lastIndex = link.endIndex;
 			link = LinkUtils.selectLink(message, lastIndex);
 		}
-		if (lastIndex < message.length())
-		{
-			command.append(tryWrap(message.substring(lastIndex)));
+		if (lastIndex < message.length()) {
+			command.append(tryWrap(message.substring(lastIndex), color));
 		}
 	}
 	
