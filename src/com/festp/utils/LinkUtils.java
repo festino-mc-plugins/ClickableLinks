@@ -1,4 +1,4 @@
-package com.festp;
+package com.festp.utils;
 
 public class LinkUtils {
 
