@@ -4,19 +4,25 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.festp.Link;
-import com.festp.LinkUtils;
+import com.festp.utils.Link;
+import com.festp.utils.LinkUtils;
 
 public class ChatHandler implements Listener
 {
 	private final JavaPlugin plugin;
+	private static final String PLACEHOLDER_NAME = "%1$s";
+	private static final String PLACEHOLDER_MESSAGE = "%2$s";
 	
 	public ChatHandler(JavaPlugin plugin) {
 		this.plugin = plugin;
@@ -39,54 +45,86 @@ public class ChatHandler implements Listener
 	 * {"text":" extra text"}<br>
 	 * ]
 	 * */
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
 	public void OnChat(AsyncPlayerChatEvent event)
 	{
 		String message = event.getMessage();
 		
-		int lastIndex = 0;
-		Link link = LinkUtils.selectLink(message, lastIndex);
+		Link link = LinkUtils.selectLink(message, 0);
 		if (link == null)
 			return;
 		
-		String nickname = event.getPlayer().getDisplayName();
-		String uuid = event.getPlayer().getUniqueId().toString();
-		String command = "tellraw @a [";
-		command += "{\"text\":\"<\"},";
-		command += "{\"text\":\"" + nickname + "\",";
-		command += "\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + nickname + "\\nType: Player\\n" + uuid + "\"},";
-		command += "\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + nickname + " \"}";
-		command += "},";
-		command += "{\"text\":\"> \"}";
-		while (link != null)
-		{
-			if (lastIndex < link.beginIndex)
-				command += ",{\"text\":\"" + message.substring(lastIndex, link.beginIndex) + "\"}";
-			
-			String linkStr = link.getString();
-			String linkClick = applyBrowserEncoding(linkStr);
-			if (!link.hasProtocol)
-				linkClick = "https://" + linkClick;
-			command += ",{\"text\":\"" + linkStr + "\",\"underlined\":true,"
-					+ "\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + linkClick + "\"}}";
-			
-			lastIndex = link.endIndex;
-			link = LinkUtils.selectLink(message, lastIndex);
-		}
-		if (lastIndex < message.length())
-		{
-			command += ",{\"text\":\"" + message.substring(lastIndex) + "\"}";
-		}
-		command += "]";
+		String format = event.getFormat(); // something like "<%1$s> %2$s"
+		StringBuilder command = new StringBuilder("tellraw @a [");
+		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(format);
+		int prevEnd = 0;
+	    while (matcher.find())
+	    {
+	        int start = matcher.start();
+	        int end = matcher.end();
+	        command.append(tryWrap(format.substring(prevEnd, start)));
+	        String placeholder = format.substring(start, end);
+	        if (placeholder.equals(PLACEHOLDER_NAME))
+				appendPlayer(command, event.getPlayer());
+	        if (placeholder.equals(PLACEHOLDER_MESSAGE))
+				appendMessage(command, message, link);
+	        prevEnd = end;
+	    }
+        command.append(tryWrap(format.substring(prevEnd)));
+		// extra comma - every function places it
+		command.deleteCharAt(command.length() - 1);
+		command.append("]");
 		
-		final String bukkitCommand = command;
+		final String bukkitCommand = command.toString();
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 			@Override
 			public void run() {
 				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), bukkitCommand);
 			}
 		});
+		
 		event.setCancelled(true);
+	}
+	
+	private static String tryWrap(String str)
+	{
+		return str == "" ? "" : "{\"text\":\"" + str + "\"},";
+	}
+	
+	private void appendPlayer(StringBuilder command, Player player)
+	{
+		String nickname = player.getDisplayName();
+		String uuid = player.getUniqueId().toString();
+		command.append("{\"text\":\"" + nickname + "\",");
+		command.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + nickname + "\\nType: Player\\n" + uuid + "\"},");
+		command.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + nickname + " \"}");
+		command.append("},");
+	}
+	
+	private void appendMessage(StringBuilder command, String message, Link firstLink)
+	{
+		int lastIndex = 0;
+		Link link = firstLink;
+		while (link != null)
+		{
+			if (lastIndex < link.beginIndex)
+				command.append(tryWrap(message.substring(lastIndex, link.beginIndex)));
+			
+			String linkStr = link.getString();
+			String linkClick = applyBrowserEncoding(linkStr);
+			if (!link.hasProtocol)
+				linkClick = "https://" + linkClick;
+			command.append("{\"text\":\"" + linkStr + "\",\"underlined\":true,"
+					+ "\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + linkClick + "\"}},");
+			
+			lastIndex = link.endIndex;
+			link = LinkUtils.selectLink(message, lastIndex);
+		}
+		if (lastIndex < message.length())
+		{
+			command.append(tryWrap(message.substring(lastIndex)));
+		}
 	}
 	
 	private String applyBrowserEncoding(String str)
