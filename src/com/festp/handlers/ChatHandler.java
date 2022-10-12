@@ -84,6 +84,9 @@ public class ChatHandler implements Listener
 			}
 		});
 		
+		String consoleMessage = format.replace(PLACEHOLDER_NAME, event.getPlayer().getDisplayName()).replace(PLACEHOLDER_MESSAGE, message);
+		Bukkit.getConsoleSender().sendMessage(consoleMessage);
+		
 		event.setCancelled(true);
 	}
 	
