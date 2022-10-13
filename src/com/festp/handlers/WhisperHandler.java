@@ -13,23 +13,23 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 
+import com.festp.Chatter;
 import com.festp.utils.Link;
 import com.festp.utils.LinkUtils;
 import com.festp.utils.RawJsonUtils;
 
 public class WhisperHandler implements Listener
 {
-	private JavaPlugin plugin;
+	private Chatter chatter;
 	private boolean isVanilla;
 	
 	private String color = ChatColor.GRAY.toString() + ChatColor.ITALIC.toString();
 	private String colorTags = "\"color\":\"gray\",\"italic\":\"true\",";
 	
-	public WhisperHandler(JavaPlugin plugin, boolean isVanilla)
+	public WhisperHandler(Chatter chatter, boolean isVanilla)
 	{
-		this.plugin = plugin;
+		this.chatter = chatter;
 		this.isVanilla = isVanilla;
 	}
 	
@@ -90,14 +90,14 @@ public class WhisperHandler implements Listener
 				from.append(" ");
 				RawJsonUtils.appendTranslated(from, fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, colorTags);
 				from.deleteCharAt(from.length() - 1);
-				executeCommand(from.toString());
+				chatter.executeCommand(from.toString());
 				
 				final StringBuilder to = new StringBuilder("tellraw ");
 				to.append(nameTo);
 				to.append(" ");
 				RawJsonUtils.appendTranslated(to, toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, colorTags);
 				to.deleteCharAt(to.length() - 1);
-				executeCommand(to.toString());
+				chatter.executeCommand(to.toString());
 			}
 			
 			event.setCancelled(true);
@@ -111,7 +111,7 @@ public class WhisperHandler implements Listener
 			RawJsonUtils.appendJoinedLinks(linkCommand, message, link, color, ", ");
 			linkCommand.deleteCharAt(linkCommand.length() - 1);
 			linkCommand.append("]");
-			executeCommand(linkCommand.toString());
+			chatter.executeCommand(linkCommand.toString());
 			String prev = nameFrom;
 			int replaceStart = linkCommand.indexOf(prev);
 			for (Player recipient : recipients)
@@ -120,20 +120,10 @@ public class WhisperHandler implements Listener
 					continue;
 				String cur = recipient.getDisplayName();
 				linkCommand.replace(replaceStart, replaceStart + prev.length(), cur);
-				executeCommand(linkCommand.toString());
+				chatter.executeCommand(linkCommand.toString());
 				prev = cur;
 			}
 		}
-	}
-	
-	private void executeCommand(String command)
-	{
-		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-			@Override
-			public void run() {
-				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
-			}
-		});
 	}
 
 	private static boolean isWhisperCommand(String command)

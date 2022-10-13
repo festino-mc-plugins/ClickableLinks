@@ -7,8 +7,9 @@ import java.util.HashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+
+import com.festp.Chatter;
 
 public class RawJsonUtils
 {
@@ -30,9 +31,7 @@ public class RawJsonUtils
 		if (sender instanceof Player)
 			RawJsonUtils.appendPlayer(command, (Player)sender, color);
 		else {
-			String name = sender.getName();
-			if (sender instanceof ConsoleCommandSender)
-				name = "Server";
+			String name = Chatter.getName(sender);
 			command.append(RawJsonUtils.wrap(name, color));
 		}
 	}
