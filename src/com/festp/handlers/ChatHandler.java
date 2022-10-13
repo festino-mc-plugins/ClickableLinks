@@ -1,9 +1,7 @@
 package com.festp.handlers;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.utils.Link;
 import com.festp.utils.LinkUtils;
+import com.festp.utils.RawJsonUtils;
 
 public class ChatHandler implements Listener
 {
@@ -46,7 +45,7 @@ public class ChatHandler implements Listener
 	 * {"text":" extra text"}<br>
 	 * ]
 	 * */
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void OnChat(AsyncPlayerChatEvent event)
 	{
 		String message = event.getMessage();
@@ -56,7 +55,7 @@ public class ChatHandler implements Listener
 			return;
 		
 		String format = event.getFormat(); // something like "<%1$s> %2$s"
-		StringBuilder command = new StringBuilder("tellraw @a [");
+		final StringBuilder command = new StringBuilder("tellraw @a [");
 		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(format);
 		int prevEnd = 0;
@@ -65,7 +64,7 @@ public class ChatHandler implements Listener
 	    {
 	        int start = matcher.start();
 	        int end = matcher.end();
-	        command.append(tryWrap(format.substring(prevEnd, start)));
+	        command.append(RawJsonUtils.tryWrap(format.substring(prevEnd, start)));
 	        
 	        int colorIndex = format.lastIndexOf('§', start);
 	        if (0 <= colorIndex && colorIndex + 2 <= end)
@@ -73,22 +72,39 @@ public class ChatHandler implements Listener
 	        
 	        String placeholder = format.substring(start, end);
 	        if (placeholder.equals(PLACEHOLDER_NAME))
-				appendPlayer(command, event.getPlayer());
+	        	RawJsonUtils.appendPlayer(command, event.getPlayer());
 	        if (placeholder.equals(PLACEHOLDER_MESSAGE))
-				appendMessage(command, message, link, lastColor);
+	        	RawJsonUtils.appendMessage(command, message, link, lastColor);
 	        
 	        prevEnd = end;
 	    }
-        command.append(tryWrap(format.substring(prevEnd)));
+        command.append(RawJsonUtils.tryWrap(format.substring(prevEnd)));
 		// extra comma - every function places it
 		command.deleteCharAt(command.length() - 1);
 		command.append("]");
+
+		final Set<Player> recipients = event.getRecipients();
+		Set<Player> onlinePlayers = new HashSet<Player>(Bukkit.getOnlinePlayers());
+		for (Player p : recipients)
+			onlinePlayers.remove(p);
+		boolean isEveryone = onlinePlayers.isEmpty();
 		
-		final String bukkitCommand = command.toString();
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 			@Override
 			public void run() {
-				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), bukkitCommand);
+				if (isEveryone) {
+					Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString());
+				}
+				else {
+					String prev = "@a";
+					int replaceStart = command.indexOf(prev);
+					for (Player p : recipients) {
+						String cur = p.getDisplayName();
+						command.replace(replaceStart, replaceStart + prev.length(), cur);
+						Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString());
+						prev = cur;
+					}
+				}
 			}
 		});
 		
@@ -96,82 +112,5 @@ public class ChatHandler implements Listener
 		Bukkit.getConsoleSender().sendMessage(consoleMessage);
 		
 		event.setCancelled(true);
-	}
-
-	
-	private static String tryWrap(String str)
-	{
-		return tryWrap(str, "");
-	}
-	private static String tryWrap(String str, String color)
-	{
-		return str == "" ? "" : "{\"text\":\"" + color + str + "\"},";
-	}
-	
-	private void appendPlayer(StringBuilder command, Player player)
-	{
-		String nickname = player.getDisplayName();
-		String uuid = player.getUniqueId().toString();
-		command.append("{\"text\":\"" + nickname + "\",");
-		command.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + nickname + "\\nType: Player\\n" + uuid + "\"},");
-		command.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + nickname + " \"}");
-		command.append("},");
-	}
-	
-	private void appendMessage(StringBuilder command, String message, Link firstLink, String color)
-	{
-		int lastIndex = 0;
-		Link link = firstLink;
-		while (link != null)
-		{
-			if (lastIndex < link.beginIndex) {
-				command.append(tryWrap(message.substring(lastIndex, link.beginIndex), color));
-			}
-			
-			String linkStr = link.getString();
-			String linkClick = applyBrowserEncoding(linkStr);
-			if (!link.hasProtocol)
-				linkClick = "https://" + linkClick;
-			command.append("{\"text\":\"" + color + ChatColor.UNDERLINE + linkStr + "\","
-					+ "\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + linkClick + "\"}},");
-			
-			lastIndex = link.endIndex;
-			link = LinkUtils.selectLink(message, lastIndex);
-		}
-		if (lastIndex < message.length()) {
-			command.append(tryWrap(message.substring(lastIndex), color));
-		}
-	}
-	
-	private String applyBrowserEncoding(String str)
-	{
-		try {
-			HashMap<Character, String> encoding = new HashMap<>();
-			int length = str.length();
-			for (int i = 0; i < length; i++)
-			{
-				char c = str.charAt(i);
-				if (encoding.containsKey(c))
-					continue;
-				// not very optimized?
-				String encoded = URLEncoder.encode("" + c, StandardCharsets.UTF_8.toString());
-				encoding.put(c, encoded);
-			}
-
-			StringBuilder res = new StringBuilder();
-			for (int i = 0; i < length; i++)
-			{
-				char c = str.charAt(i);
-				if (c <= 255)
-					res.append(c);
-				else
-					res.append(encoding.get(c));
-			}
-			
-			return res.toString();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return str;
-		}
 	}
 }
