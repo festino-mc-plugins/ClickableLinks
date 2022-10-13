@@ -1,11 +1,18 @@
 package com.festp.handlers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.utils.Link;
@@ -27,17 +34,25 @@ public class WhisperHandler implements Listener
 	}
 	
 	@EventHandler
+	public void onServerCommand(ServerCommandEvent event)
+	{
+		onCommand(event, event.getSender(), "/" + event.getCommand());
+	}
+	@EventHandler
 	public void onPlayerCommand(PlayerCommandPreprocessEvent event)
 	{
-		String command = event.getMessage();
-		
+		onCommand(event, event.getPlayer(), event.getMessage());
+	}
+	
+	private void onCommand(Cancellable event, CommandSender sender, String command)
+	{
 		if (!isWhisperCommand(command))
 			return;
 
 		int[] indices = selectRecipients(command);
 		if (indices == null)
 			return;
-		Player[] recipients = getRecipients(command.substring(indices[0], indices[1]));
+		Player[] recipients = getRecipients(command.substring(indices[0], indices[1]), sender);
 		if (recipients == null || recipients.length == 0)
 			return;
 		
@@ -49,7 +64,7 @@ public class WhisperHandler implements Listener
 		if (link == null)
 			return;
 		
-		String nameFrom = event.getPlayer().getDisplayName();
+		String nameFrom = sender.getName();
 		if (isVanilla)
 		{
 			String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
@@ -62,7 +77,7 @@ public class WhisperHandler implements Listener
 			modifiedMessage.append("],");
 			
 			StringBuilder wrapNameFrom = new StringBuilder();
-			RawJsonUtils.appendPlayer(wrapNameFrom, event.getPlayer(), color);
+			RawJsonUtils.appendSender(wrapNameFrom, sender, color);
 			
 			for (Player recipient : recipients)
 			{
@@ -101,7 +116,7 @@ public class WhisperHandler implements Listener
 			int replaceStart = linkCommand.indexOf(prev);
 			for (Player recipient : recipients)
 			{
-				if (recipient == event.getPlayer())
+				if (recipient == sender)
 					continue;
 				String cur = recipient.getDisplayName();
 				linkCommand.replace(replaceStart, replaceStart + prev.length(), cur);
@@ -128,28 +143,59 @@ public class WhisperHandler implements Listener
 
 	private static int[] selectRecipients(String command)
 	{
-		// TODO selectors!!! @a[...] @p[...] @r[...] containing spaces
 		int indexStart = command.indexOf(" ");
 		if (indexStart < 0)
 			return null;
 		indexStart++;
-		int indexEnd = command.indexOf(" ", indexStart);
-		while (indexEnd == indexStart) {
-			indexStart = indexEnd + 1;
-			indexEnd = command.indexOf(" ", indexStart);
-		}
-		if (indexEnd < 0)
+		
+		int length = command.length();
+		while (indexStart < length && command.charAt(indexStart) == ' ')
+			indexStart++;
+		if (indexStart >= length)
 			return null;
+		
+		int indexEnd;
+		if (command.charAt(indexStart) != '@' || indexStart + 2 >= length) {
+			indexEnd = command.indexOf(" ", indexStart);
+			indexEnd = indexEnd < 0 ? length : indexEnd;
+			return new int[] { indexStart, indexEnd };
+		}
+		
+		indexEnd = indexStart + 2;
+		if (command.charAt(indexEnd) != '[') {
+			if (command.charAt(indexEnd) == ' ')
+				return new int[] { indexStart, indexEnd };
+			return null;
+		}
+		
+		indexEnd++;
+		int openedBrackets = 1;
+		while (indexEnd < length && openedBrackets > 0) {
+			char c = command.charAt(indexEnd);
+			if (c == '[')
+				openedBrackets++;
+			else if (c == ']')
+				openedBrackets--;
+			indexEnd++;
+		}
 		return new int[] { indexStart, indexEnd };
 	}
 	
-	private static Player[] getRecipients(String selector)
+	private static Player[] getRecipients(String selector, CommandSender sender)
 	{
-		// TODO selectors!!! @a[...] @p[...] @r[...]
-		Player recipient = tryGetPlayer(selector);
-		if (recipient == null)
-			return null;
-		return new Player[] { recipient };
+		if (selector.charAt(0) != '@') {
+			Player recipient = tryGetPlayer(selector);
+			if (recipient == null)
+				return null;
+			return new Player[] { recipient };
+		}
+		
+		List<Entity> entities = Bukkit.getServer().selectEntities(sender, selector);
+		List<Player> players = new ArrayList<>();
+		for (Entity e : entities)
+			if (e instanceof Player)
+				players.add((Player)e);
+		return players.toArray(new Player[0]);
 	}
 
 	private static Player tryGetPlayer(String name)

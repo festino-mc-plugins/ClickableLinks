@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class RawJsonUtils
@@ -22,7 +23,14 @@ public class RawJsonUtils
 	{
 		return "{\"text\":\"" + color + str + "\"},";
 	}
-	
+
+	public static void appendSender(StringBuilder command, CommandSender sender, String color)
+	{
+		if (sender instanceof Player)
+			RawJsonUtils.appendPlayer(command, (Player)sender, color);
+		else
+			command.append(RawJsonUtils.wrap(sender.getName(), color));
+	}
 	public static void appendPlayer(StringBuilder command, Player player, String color)
 	{
 		String nickname = player.getDisplayName();
