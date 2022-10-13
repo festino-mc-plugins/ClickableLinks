@@ -5,6 +5,8 @@ public class LinkUtils {
 	// TODO check telegram desktop code
 	// TextWithTags Ui::InputField::getTextWithTags, getTextWithTagsPart, getTextPart...
 	
+	// TODO may be check if in https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains
+	
 	public static Link selectLink(String message, int indexBegin)
 	{
 		// starts with http://, www. or whatever, ends with .ru, .com, ... or /<anything>; also ip is valid
