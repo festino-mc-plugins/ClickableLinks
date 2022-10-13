@@ -12,7 +12,7 @@ Preserves format, i.e.
 Works on:  
 * player chat;  
 * player and console private messages (/w, /msg, /tell);  
-* (soon) /say, /me
+* /say, /me
 
 Can deal with:  
 * Regular links  
