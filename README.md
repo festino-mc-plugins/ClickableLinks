@@ -9,8 +9,12 @@ Preserves format, i.e.
 * prefixes, suffixes and colors in LuckyPerms x Vault x EssentialsX Chat;
 * prefixes and colors in TownyChat.
 
-Can deal with:  
+Works on:  
+* player chat;  
+* player and console private messages (/w, /msg, /tell);  
+* (soon) /say, /me
 
+Can deal with:  
 * Regular links  
 [https://www.youtube.com](https://github.com/festino-mc-plugins/LinkRestorer/edit/main/README.md#features)  
 * No scheme (auto _https://_)  
