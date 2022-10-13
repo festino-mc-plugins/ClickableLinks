@@ -16,14 +16,18 @@ public class RawJsonUtils
 	}
 	public static String tryWrap(String str, String color)
 	{
-		return str == "" ? "" : "{\"text\":\"" + color + str + "\"},";
+		return str == "" ? "" : wrap(str, color);
+	}
+	public static String wrap(String str, String color)
+	{
+		return "{\"text\":\"" + color + str + "\"},";
 	}
 	
-	public static void appendPlayer(StringBuilder command, Player player)
+	public static void appendPlayer(StringBuilder command, Player player, String color)
 	{
 		String nickname = player.getDisplayName();
 		String uuid = player.getUniqueId().toString();
-		command.append("{\"text\":\"" + nickname + "\",");
+		command.append("{\"text\":\"" + color + nickname + "\",");
 		command.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + nickname + "\\nType: Player\\n" + uuid + "\"},");
 		command.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + nickname + " \"}");
 		command.append("},");
@@ -46,6 +50,25 @@ public class RawJsonUtils
 		}
 		if (lastIndex < message.length()) {
 			command.append(tryWrap(message.substring(lastIndex), color));
+		}
+	}
+	
+	public static void appendJoinedLinks(StringBuilder command, String message, Link firstLink, String color, String sep)
+	{
+		Link link = firstLink;
+		boolean isFirst = true;
+		String wrappedSep = tryWrap(sep, color);
+		while (link != null)
+		{
+			if (isFirst) {
+				isFirst = false;
+			}
+			else {
+				command.append(wrappedSep);
+			}
+			appendLink(command, link, color);
+			
+			link = LinkUtils.selectLink(message, link.endIndex);
 		}
 	}
 	
@@ -90,5 +113,24 @@ public class RawJsonUtils
 			return str;
 		}
 	}
-
+	
+	/** Check for more info: <a>https://minecraft.fandom.com/wiki/Raw_JSON_text_format#Translated_Text</a> */
+	public static void appendTranslated(StringBuilder command, String identifier, CharSequence[] textComponents, CharSequence colorTags)
+	{
+		command.append("{");
+		command.append(colorTags);
+		command.append("\"translate\":\"");
+		command.append(identifier);
+		command.append("\"");
+		if (textComponents == null || textComponents.length == 0) {
+			command.append("},");
+			return;
+		}
+		command.append(",\"with\":[");
+		for (CharSequence component : textComponents) {
+			command.append(component);
+		}
+		command.deleteCharAt(command.length() - 1);
+		command.append("]},");
+	}
 }

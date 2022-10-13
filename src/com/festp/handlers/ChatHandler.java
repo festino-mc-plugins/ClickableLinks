@@ -72,7 +72,7 @@ public class ChatHandler implements Listener
 	        
 	        String placeholder = format.substring(start, end);
 	        if (placeholder.equals(PLACEHOLDER_NAME))
-	        	RawJsonUtils.appendPlayer(command, event.getPlayer());
+	        	RawJsonUtils.appendPlayer(command, event.getPlayer(), "");
 	        if (placeholder.equals(PLACEHOLDER_MESSAGE))
 	        	RawJsonUtils.appendMessage(command, message, link, lastColor);
 	        
