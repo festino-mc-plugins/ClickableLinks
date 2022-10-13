@@ -1,9 +1,9 @@
-name: LinkRestorer
+name: ClickableLinks
 version: 1.0.0
 authors: [FEST_Channel, EvilGeniys]
 
 description: Return clickable links to minecraft chat!
-website: https://github.com/festino/LinkRestorer
+website: https://github.com/festino-mc-plugins/ClickableLinks
 
 main: com.festp.Main
 api-version: 1.14
