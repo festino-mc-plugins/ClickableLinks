@@ -1,5 +1,7 @@
 # LinkRestorer
- Return clickable links to minecraft chat  
+ Returns clickable links to minecraft chat.  
+
+Note: Spigot removed this feature in 1.19, but Paper did not.  
   
 <h2>Features</h2>
 
