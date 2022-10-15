@@ -26,7 +26,7 @@ public class ChatHandler implements Listener
 		if (link == null)
 			return;
 
-		chatter.sendFormatted(event.getRecipients(), event.getPlayer(), message, event.getFormat(), link);
+		chatter.sendFormatted(event.getRecipients(), event.getPlayer(), message, event.getFormat(), link, true);
 		event.setCancelled(true);
 	}
 }

@@ -56,7 +56,7 @@ public class SmallCommandsHandler implements Listener
 		if (link == null)
 			return;
 		
-		chatter.sendFormatted(null, sender, message, "* %1$s %2$s", link);
+		chatter.sendFormatted(null, sender, message, "* %1$s %2$s", link, false);
 		event.setCancelled(true);
 	}
 
@@ -70,7 +70,7 @@ public class SmallCommandsHandler implements Listener
 		if (link == null)
 			return;
 
-		chatter.sendFormatted(null, sender, message, "[%1$s] %2$s", link);
+		chatter.sendFormatted(null, sender, message, "[%1$s] %2$s", link, false);
 		event.setCancelled(true);
 	}
 

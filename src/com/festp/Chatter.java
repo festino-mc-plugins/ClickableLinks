@@ -60,10 +60,13 @@ public class Chatter
 	 * @param message is full message containing link(s)
 	 * @param format use "%1$s" for the sender name and "%2$s" for the message, i.e. "<%1$s> %2$s"
 	 * @param link is the first link found*/
-	public void sendFormatted(final Set<Player> recipients, CommandSender sender, String message, String format, Link link)
+	public void sendFormatted(final Set<Player> recipients, CommandSender sender, String message, String format, Link link, boolean sendToConsole)
 	{
-		String consoleMessage = format.replace(PLACEHOLDER_NAME, getName(sender)).replace(PLACEHOLDER_MESSAGE, message);
-		Bukkit.getConsoleSender().sendMessage(consoleMessage);
+		if (sendToConsole)
+		{
+			String consoleMessage = format.replace(PLACEHOLDER_NAME, getName(sender)).replace(PLACEHOLDER_MESSAGE, message);
+			Bukkit.getConsoleSender().sendMessage(consoleMessage);
+		}
 		
 		// check if actually no recipients
 		if (recipients != null && recipients.isEmpty() || Bukkit.getOnlinePlayers().size() == 0)
