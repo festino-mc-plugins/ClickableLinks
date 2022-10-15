@@ -1,9 +1,13 @@
 name: ClickableLinks
 version: 1.0.0
 authors: [FEST_Channel, EvilGeniys]
-
-description: Return clickable links to minecraft chat!
+description: Bring clickable links to minecraft chat!
 website: https://github.com/festino-mc-plugins/ClickableLinks
 
 main: com.festp.Main
+
+commands:
+         links:
+           description: Configure plugin behaviour.
+           default: op
 api-version: 1.14

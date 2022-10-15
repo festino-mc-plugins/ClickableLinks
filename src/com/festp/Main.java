@@ -3,6 +3,7 @@ package com.festp;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.festp.commands.LinksCommand;
 import com.festp.handlers.ChatHandler;
 import com.festp.handlers.SmallCommandsHandler;
 import com.festp.handlers.WhisperHandler;
@@ -27,5 +28,9 @@ public class Main extends JavaPlugin
     	
     	WhisperHandler whisperHandler = new WhisperHandler(chatter, config);
     	pm.registerEvents(whisperHandler, this);
+    	
+    	LinksCommand commandWorker = new LinksCommand(config);
+    	getCommand(LinksCommand.COMMAND).setExecutor(commandWorker);
+    	getCommand(LinksCommand.COMMAND).setTabCompleter(commandWorker);
 	}
 }
