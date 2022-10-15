@@ -117,7 +117,7 @@ public class Chatter
 					StringBuilder command = builder.releaseStringBuilder();
 					int replaceStart = command.indexOf(prev);
 					for (Player p : recipients) {
-						String cur = p.getDisplayName();
+						String cur = p.getPlayerListName();
 						command.replace(replaceStart, replaceStart + prev.length(), cur);
 						Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString());
 						prev = cur;
@@ -130,7 +130,7 @@ public class Chatter
 	public static String getName(CommandSender sender)
 	{
 		if (sender instanceof Player)
-			return ((Player)sender).getDisplayName();
+			return ((Player)sender).getPlayerListName();
 		if (sender instanceof ConsoleCommandSender)
 			return "Server";
 		return sender.getName();

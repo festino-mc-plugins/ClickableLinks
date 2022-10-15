@@ -72,7 +72,8 @@ public class WhisperHandler implements Listener
 		if (link == null)
 			return;
 		
-		String nameFrom = sender.getName();
+		String nameFrom = Chatter.getName(sender);
+		System.out.println(nameFrom);
 		if (config.get(Config.Key.IS_VANILLA_WHISPER, true))
 		{
 			String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
@@ -91,7 +92,8 @@ public class WhisperHandler implements Listener
 			
 			for (Player recipient : recipients)
 			{
-				String nameTo = recipient.getDisplayName();
+				String nameTo = recipient.getPlayerListName();
+				System.out.println(nameTo);
 				builder = new RawJsonBuilder(config.getBuilderSettings());
 				builder.appendPlayer(recipient, color);
 				StringBuilder wrapNameTo = builder.releaseStringBuilder();
@@ -128,7 +130,7 @@ public class WhisperHandler implements Listener
 			{
 				if (recipient == sender)
 					continue;
-				String cur = recipient.getDisplayName();
+				String cur = recipient.getPlayerListName();
 				linkCommand.replace(replaceStart, replaceStart + prev.length(), cur);
 				chatter.executeCommand(linkCommand.toString());
 				prev = cur;
