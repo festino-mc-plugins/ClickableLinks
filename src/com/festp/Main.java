@@ -14,24 +14,24 @@ public class Main extends JavaPlugin
 	public void onEnable()
 	{
 		Logger.setLogger(getLogger());
-    	Config config = new Config(this);
+		Config config = new Config(this);
 		config.load();
-		
-    	Chatter chatter = new Chatter(this, config);
 
-    	PluginManager pm = getServer().getPluginManager();
-    	
-    	ChatHandler chatHandler = new ChatHandler(chatter);
-    	pm.registerEvents(chatHandler, this);
-    	
-    	SmallCommandsHandler smallHandler = new SmallCommandsHandler(chatter);
-    	pm.registerEvents(smallHandler, this);
-    	
-    	WhisperHandler whisperHandler = new WhisperHandler(chatter, config);
-    	pm.registerEvents(whisperHandler, this);
-    	
-    	LinksCommand commandWorker = new LinksCommand(config);
-    	getCommand(LinksCommand.COMMAND).setExecutor(commandWorker);
-    	getCommand(LinksCommand.COMMAND).setTabCompleter(commandWorker);
+		Chatter chatter = new Chatter(this, config);
+
+		PluginManager pm = getServer().getPluginManager();
+
+		ChatHandler chatHandler = new ChatHandler(chatter);
+		pm.registerEvents(chatHandler, this);
+
+		SmallCommandsHandler smallHandler = new SmallCommandsHandler(chatter);
+		pm.registerEvents(smallHandler, this);
+
+		WhisperHandler whisperHandler = new WhisperHandler(chatter, config);
+		pm.registerEvents(whisperHandler, this);
+
+		LinksCommand commandWorker = new LinksCommand(config);
+		getCommand(LinksCommand.COMMAND).setExecutor(commandWorker);
+		getCommand(LinksCommand.COMMAND).setTabCompleter(commandWorker);
 	}
 }

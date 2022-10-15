@@ -83,30 +83,30 @@ public class Chatter
 		final boolean f_isEveryone = isEveryone;
 		
 		final RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings(), "tellraw @a ");
-        builder.startList();
+		builder.startList();
 		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(format);
 		int prevEnd = 0;
 		String lastColor = ChatColor.RESET.toString();
-	    while (matcher.find())
-	    {
-	        int start = matcher.start();
-	        int end = matcher.end();
-	        builder.tryWrap(format.substring(prevEnd, start), "");
-	        
-	        int colorIndex = format.lastIndexOf('§', start);
-	        if (0 <= colorIndex && colorIndex + 2 <= end)
-	        	lastColor = format.substring(colorIndex, colorIndex + 2);
-	        
-	        String placeholder = format.substring(start, end);
-	        if (placeholder.equals(PLACEHOLDER_NAME))
-	        	builder.appendSender(sender, "");
-	        if (placeholder.equals(PLACEHOLDER_MESSAGE))
-	        	builder.appendMessage(message, link, lastColor);
-	        
-	        prevEnd = end;
-	    }
-        builder.tryWrap(format.substring(prevEnd), "");
+		while (matcher.find())
+		{
+			int start = matcher.start();
+			int end = matcher.end();
+			builder.tryWrap(format.substring(prevEnd, start), "");
+
+			int colorIndex = format.lastIndexOf('§', start);
+			if (0 <= colorIndex && colorIndex + 2 <= end)
+				lastColor = format.substring(colorIndex, colorIndex + 2);
+
+			String placeholder = format.substring(start, end);
+			if (placeholder.equals(PLACEHOLDER_NAME))
+				builder.appendSender(sender, "");
+			if (placeholder.equals(PLACEHOLDER_MESSAGE))
+				builder.appendMessage(message, link, lastColor);
+
+			prevEnd = end;
+		}
+	    builder.tryWrap(format.substring(prevEnd), "");
         builder.endList();
 		
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {

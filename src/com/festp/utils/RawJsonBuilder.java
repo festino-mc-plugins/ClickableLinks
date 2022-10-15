@@ -60,7 +60,7 @@ public class RawJsonBuilder
 	
 	public void appendMessage(String message, Link firstLink, String color)
 	{
-        startList();
+		startList();
         
 		int lastIndex = 0;
 		Link link = firstLink;
@@ -79,12 +79,12 @@ public class RawJsonBuilder
 			tryWrap(message.substring(lastIndex), color);
 		}
 		
-        endList();
+		endList();
 	}
 	
 	public void appendJoinedLinks(String message, Link firstLink, String color, String sep)
 	{
-        startList();
+		startList();
         
 		Link link = firstLink;
 		boolean isFirst = true;
@@ -102,7 +102,7 @@ public class RawJsonBuilder
 			link = LinkUtils.selectLink(message, link.endIndex);
 		}
 
-        endList();
+		endList();
 	}
 	
 	public void appendLink(Link link, String color)
