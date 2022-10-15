@@ -1,5 +1,5 @@
 # ClickableLinks
- Returns clickable links to minecraft chat.  
+ Brings clickable links to minecraft chat.  
 
 Note: Paper server still provides this feature, but Spigot removed it in 1.19. Therefore, use this plugin only on Spigot/Bukkit 1.19+ servers, but on 1.18- it can also be useful due to link underlining and supported link formats.  
   
