@@ -98,9 +98,9 @@ public class Config implements IConfig
 	
 	
 	public enum Key implements IConfig.Key {
-		IS_LINK_UNDERLINED("is-link-underlined", true),
-		IS_WHISPER("is-whisper", true),
-		IS_VANILLA_WHISPER("is-vanilla-whisper", true);
+		IS_LINK_UNDERLINED("underline-links", true),
+		IS_WHISPER("do-whisper", true),
+		IS_WHISPER_NEW_MESSAGE("whisper-new-message", false);
 		
 		private final String name;
 		private final Object defaultValue;

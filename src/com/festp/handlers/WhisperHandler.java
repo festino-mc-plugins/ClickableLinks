@@ -50,7 +50,7 @@ public class WhisperHandler implements Listener
 	{
 		if (!config.get(Config.Key.IS_WHISPER, true))
 			return;
-		if (event.isCancelled() && config.get(Config.Key.IS_VANILLA_WHISPER, true))
+		if (event.isCancelled() && !config.get(Config.Key.IS_WHISPER_NEW_MESSAGE, false))
 			return;
 		
 		if (!isWhisperCommand(command))
@@ -73,7 +73,7 @@ public class WhisperHandler implements Listener
 			return;
 		
 		String nameFrom = Chatter.getName(sender);
-		if (config.get(Config.Key.IS_VANILLA_WHISPER, true))
+		if (!config.get(Config.Key.IS_WHISPER_NEW_MESSAGE, false))
 		{
 			String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
 			String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
