@@ -59,6 +59,13 @@ public class Chatter
 	 * @param link is the first link found*/
 	public void sendFormatted(final Set<Player> recipients, CommandSender sender, String message, String format, Link link)
 	{
+		String consoleMessage = format.replace(PLACEHOLDER_NAME, getName(sender)).replace(PLACEHOLDER_MESSAGE, message);
+		Bukkit.getConsoleSender().sendMessage(consoleMessage);
+		
+		// check if actually no recipients
+		if (recipients != null && recipients.isEmpty() || Bukkit.getOnlinePlayers().size() == 0)
+			return;
+		
 		boolean isEveryone = true;
 		if (recipients != null)
 		{
@@ -115,9 +122,6 @@ public class Chatter
 				}
 			}
 		});
-		
-		String consoleMessage = format.replace(PLACEHOLDER_NAME, getName(sender)).replace(PLACEHOLDER_MESSAGE, message);
-		Bukkit.getConsoleSender().sendMessage(consoleMessage);
 	}
 	
 	public static String getName(CommandSender sender)
