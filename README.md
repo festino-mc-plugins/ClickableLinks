@@ -9,13 +9,13 @@ Other pages: [Spigot](https://www.spigotmc.org/resources/clickablelinks.105786/)
 
 Preserves format, e.g.
 * prefixes, suffixes and colors in LuckyPerms x Vault x EssentialsX Chat;
-* prefixes and colors in TownyChat.
-* vanilla whisper messages (like "You whisper to %s: %s")
+* prefixes and colors in TownyChat;
+* vanilla whisper messages (like "You whisper to %s: %s").
 
 Works on:  
 * player chat;  
 * player and console private messages (/w, /msg, /tell);  
-* /say, /me
+* /say, /me.
 
 Can deal with:  
 * Regular links  
