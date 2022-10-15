@@ -134,10 +134,13 @@ public class RawJsonBuilder
 			return;
 		}
 		command.append(",\"with\":[");
+		int n = 0;
 		for (CharSequence component : textComponents) {
+			if (n > 0)
+				command.append(',');
 			command.append(component);
+			n++;
 		}
-		command.deleteCharAt(command.length() - 1);
 		command.append("]},");
 	}
 	

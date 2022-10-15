@@ -79,11 +79,8 @@ public class WhisperHandler implements Listener
 			String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
 			
 			RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
-			//builder.startList();
 			builder.appendMessage(message, link, color);
-			//builder.endList();
 			StringBuilder modifiedMessage = builder.releaseStringBuilder();
-			modifiedMessage.append(',');
 
 			builder = new RawJsonBuilder(config.getBuilderSettings());
 			builder.appendSender(sender, color);
