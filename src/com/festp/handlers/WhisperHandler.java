@@ -19,7 +19,6 @@ import com.festp.Chatter;
 import com.festp.config.Config;
 import com.festp.utils.Link;
 import com.festp.utils.LinkUtils;
-import com.festp.utils.RawJsonBuilder;
 
 public class WhisperHandler implements Listener
 {
@@ -27,7 +26,6 @@ public class WhisperHandler implements Listener
 	private Config config;
 	
 	private String color = ChatColor.GRAY.toString() + ChatColor.ITALIC.toString();
-	private String colorTags = "\"color\":\"gray\",\"italic\":\"true\",";
 	
 	public WhisperHandler(Chatter chatter, Config config)
 	{
@@ -72,67 +70,14 @@ public class WhisperHandler implements Listener
 		if (link == null)
 			return;
 		
-		String nameFrom = Chatter.getName(sender);
 		if (!config.get(Config.Key.IS_WHISPER_NEW_MESSAGE, false))
 		{
-			String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
-			String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
-			
-			RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
-			builder.appendMessage(message, link, color);
-			StringBuilder modifiedMessage = builder.releaseStringBuilder();
-
-			builder = new RawJsonBuilder(config.getBuilderSettings());
-			builder.appendSender(sender, color);
-			StringBuilder wrapNameFrom = builder.releaseStringBuilder();
-			
-			for (Player recipient : recipients)
-			{
-				String nameTo = recipient.getPlayerListName();
-				if (sender instanceof Player)
-				{
-					builder = new RawJsonBuilder(config.getBuilderSettings());
-					builder.appendPlayer(recipient, color);
-					StringBuilder wrapNameTo = builder.releaseStringBuilder();
-					
-					RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
-					from.append(nameFrom);
-					from.append(" ");
-					from.appendTranslated(fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, colorTags);
-					chatter.executeCommand(from.build());
-				}
-				
-				RawJsonBuilder to = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
-				to.append(nameTo);
-				to.append(" ");
-				to.appendTranslated(toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, colorTags);
-				chatter.executeCommand(to.build());
-			}
-			
 			event.setCancelled(true);
+			chatter.sendWhisperMessage(sender, recipients, message, link, color);
 		}
 		else
 		{
-			// send extra message including the link list
-			RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
-			builder.append(nameFrom);
-			builder.append(" ");
-			builder.appendJoinedLinks(message, link, color, ", ");
-			StringBuilder linkCommand = builder.releaseStringBuilder();
-			
-			chatter.executeCommand(linkCommand.toString());
-			
-			String prev = nameFrom;
-			int replaceStart = linkCommand.indexOf(prev);
-			for (Player recipient : recipients)
-			{
-				if (recipient == sender)
-					continue;
-				String cur = recipient.getPlayerListName();
-				linkCommand.replace(replaceStart, replaceStart + prev.length(), cur);
-				chatter.executeCommand(linkCommand.toString());
-				prev = cur;
-			}
+			chatter.sendOnlyLinks(sender, recipients, message, link, color);
 		}
 	}
 

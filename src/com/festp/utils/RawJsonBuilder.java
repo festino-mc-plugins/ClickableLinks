@@ -122,10 +122,10 @@ public class RawJsonBuilder
 	}
 	
 	/** Check for more info: <a>https://minecraft.fandom.com/wiki/Raw_JSON_text_format#Translated_Text</a> */
-	public void appendTranslated(String identifier, CharSequence[] textComponents, CharSequence colorTags)
+	public void appendTranslated(String identifier, CharSequence[] textComponents, String color)
 	{
 		command.append("{");
-		command.append(colorTags);
+		command.append(getColorTags(color));
 		command.append("\"translate\":\"");
 		command.append(identifier);
 		command.append("\"");
@@ -142,6 +142,33 @@ public class RawJsonBuilder
 			n++;
 		}
 		command.append("]},");
+	}
+	
+	/** @param color is ChatColor.GRAY.toString() + ChatColor.ITALIC.toString()
+	 *  @return "color":"gray","italic":"true", */
+	private static String getColorTags(String color)
+	{
+		StringBuilder res = new StringBuilder();
+		for (int i = 1; i < color.length(); i += 2)
+		{
+			ChatColor c = ChatColor.getByChar(color.charAt(i));
+			if (c == ChatColor.ITALIC)
+				res.append("\"italic\":\"true\",");
+			else if (c == ChatColor.UNDERLINE)
+				res.append("\"underlined\":\"true\",");
+			else if (c == ChatColor.BOLD)
+				res.append("\"bold\":\"true\",");
+			else if (c == ChatColor.STRIKETHROUGH)
+				res.append("\"strikethrough\":\"true\",");
+			else if (c == ChatColor.MAGIC)
+				res.append("\"obfuscated\":\"true\",");
+			else {
+				res.append("\"color\":\"");
+				res.append(c.name().toLowerCase());
+				res.append("\",");
+			}
+		}
+		return res.toString();
 	}
 	
 	public void startList()

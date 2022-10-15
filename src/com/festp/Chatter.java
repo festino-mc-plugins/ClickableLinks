@@ -130,6 +130,68 @@ public class Chatter
 		});
 	}
 	
+	public void sendWhisperMessage(CommandSender sender, Player[] recipients, String message, Link link, String color)
+	{
+		String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
+		String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
+		
+		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
+		builder.appendMessage(message, link, color);
+		StringBuilder modifiedMessage = builder.releaseStringBuilder();
+
+		String nameFrom = Chatter.getName(sender);
+		builder = new RawJsonBuilder(config.getBuilderSettings());
+		builder.appendSender(sender, color);
+		StringBuilder wrapNameFrom = builder.releaseStringBuilder();
+		
+		for (Player recipient : recipients)
+		{
+			String nameTo = recipient.getPlayerListName();
+			if (sender instanceof Player)
+			{
+				builder = new RawJsonBuilder(config.getBuilderSettings());
+				builder.appendPlayer(recipient, color);
+				StringBuilder wrapNameTo = builder.releaseStringBuilder();
+				
+				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
+				from.append(nameFrom);
+				from.append(" ");
+				from.appendTranslated(fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, color);
+				executeCommand(from.build());
+			}
+			
+			RawJsonBuilder to = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
+			to.append(nameTo);
+			to.append(" ");
+			to.appendTranslated(toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, color);
+			executeCommand(to.build());
+		}
+	}
+	
+	public void sendOnlyLinks(CommandSender sender, Player[] recipients, String message, Link link, String color)
+	{
+		String nameFrom = Chatter.getName(sender);
+		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
+		builder.append(nameFrom);
+		builder.append(" ");
+		builder.appendJoinedLinks(message, link, color, ", ");
+		StringBuilder linkCommand = builder.releaseStringBuilder();
+		
+		executeCommand(linkCommand.toString());
+		
+		String prev = nameFrom;
+		int replaceStart = linkCommand.indexOf(prev);
+		for (Player recipient : recipients)
+		{
+			if (recipient == sender)
+				continue;
+			String cur = recipient.getPlayerListName();
+			linkCommand.replace(replaceStart, replaceStart + prev.length(), cur);
+			executeCommand(linkCommand.toString());
+			prev = cur;
+		}
+	}
+	
 	public static String getName(CommandSender sender)
 	{
 		if (sender instanceof Player)
