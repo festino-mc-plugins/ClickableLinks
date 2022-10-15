@@ -89,15 +89,18 @@ public class WhisperHandler implements Listener
 			for (Player recipient : recipients)
 			{
 				String nameTo = recipient.getPlayerListName();
-				builder = new RawJsonBuilder(config.getBuilderSettings());
-				builder.appendPlayer(recipient, color);
-				StringBuilder wrapNameTo = builder.releaseStringBuilder();
-
-				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
-				from.append(nameFrom);
-				from.append(" ");
-				from.appendTranslated(fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, colorTags);
-				chatter.executeCommand(from.build());
+				if (sender instanceof Player)
+				{
+					builder = new RawJsonBuilder(config.getBuilderSettings());
+					builder.appendPlayer(recipient, color);
+					StringBuilder wrapNameTo = builder.releaseStringBuilder();
+					
+					RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
+					from.append(nameFrom);
+					from.append(" ");
+					from.appendTranslated(fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, colorTags);
+					chatter.executeCommand(from.build());
+				}
 				
 				RawJsonBuilder to = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
 				to.append(nameTo);
