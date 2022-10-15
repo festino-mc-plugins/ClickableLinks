@@ -4,6 +4,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.commands.LinksCommand;
+import com.festp.config.Config;
 import com.festp.handlers.ChatHandler;
 import com.festp.handlers.SmallCommandsHandler;
 import com.festp.handlers.WhisperHandler;
@@ -14,7 +15,7 @@ public class Main extends JavaPlugin
 	{
 		Logger.setLogger(getLogger());
     	Config config = new Config(this);
-		config.loadConfig();
+		config.load();
 		
     	Chatter chatter = new Chatter(this, config);
 

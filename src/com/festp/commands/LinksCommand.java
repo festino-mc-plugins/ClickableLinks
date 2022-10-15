@@ -9,16 +9,14 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
-import com.festp.Config;
+import com.festp.config.Config;
 
 public class LinksCommand implements CommandExecutor, TabCompleter
 {
-	private static final String OPTION_UNDERLINE = "underline";
-	private static final String OPTION_WHISPER = "vanillaWhisper";
 	public static final String COMMAND = "links";
 
 	String message_noOp = ChatColor.RED + "You must be an operator to perform this command.";
-	String message_noArgs = ChatColor.RED + "Usage: /links <" + OPTION_UNDERLINE + "|" + OPTION_WHISPER + "> [true|false]";
+	String message_noArgs = ChatColor.RED + "Usage: /links <option> [true|false]";
 	String message_arg0 = ChatColor.RED + "\"%s\" is an invalid option. Please follow tab-completion.";
 	String message_arg1 = ChatColor.RED + "\"%s\" is an invalid value. Please follow tab-completion.";
 	String message_getOk = ChatColor.GREEN + "Option %s is equal to %s.";
@@ -31,7 +29,6 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 		this.config = config;
 	}
 
-	// dirty code
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String lbl, String[] args)
 	{
@@ -44,10 +41,16 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 			sender.sendMessage(message_noArgs);
 			return false;
 		}
-		if (args[0].equalsIgnoreCase(OPTION_UNDERLINE))
+		Config.Key key = null;
+		for (Config.Key k : Config.Key.values())
+			if (k.toString().equalsIgnoreCase(args[0])) {
+				key = k;
+				break;
+			}
+		if (key != null)
 		{
 			if (args.length == 1) {
-				sender.sendMessage(String.format(message_setOk, OPTION_UNDERLINE, config.getIsLinkUnderlined()));
+				sender.sendMessage(String.format(message_setOk, key.toString(), config.get(key)));
 				return true;
 			}
 			Boolean val = tryParseBoolean(args[1]);
@@ -56,25 +59,8 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 				return false;
 			}
 			
-			config.setIsLinkUnderlined(val);
-			sender.sendMessage(String.format(message_setOk, OPTION_UNDERLINE, val));
-			
-			return true;
-		}
-		if (args[0].equalsIgnoreCase(OPTION_WHISPER))
-		{
-			if (args.length == 1) {
-				sender.sendMessage(String.format(message_setOk, OPTION_WHISPER, config.getIsVanillaWhisper()));
-				return true;
-			}
-			Boolean val = tryParseBoolean(args[1]);
-			if (val == null) {
-				sender.sendMessage(String.format(message_arg1, args[1]));
-				return false;
-			}
-			
-			config.setIsVanillaWhisper(val);
-			sender.sendMessage(String.format(message_setOk, OPTION_WHISPER, val));
+			config.set(key, val);
+			sender.sendMessage(String.format(message_setOk, key.toString(), val));
 			
 			return true;
 		}
@@ -95,12 +81,18 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 		
 		if (args.length <= 1)
 		{
-			options.add(OPTION_UNDERLINE);
-			options.add(OPTION_WHISPER);
+			for (Config.Key k : Config.Key.values())
+				options.add(k.toString());
 		}
 		else if (args.length == 2)
 		{
-			if (args[0].equalsIgnoreCase(OPTION_UNDERLINE) || args[0].equalsIgnoreCase(OPTION_WHISPER))
+			boolean hasKey = false;
+			for (Config.Key k : Config.Key.values())
+				if (k.toString().equalsIgnoreCase(args[0])) {
+					hasKey = true;
+					break;
+				}
+			if (hasKey)
 			{
 				options.add("true");
 				options.add("false");

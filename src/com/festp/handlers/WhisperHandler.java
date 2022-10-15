@@ -16,7 +16,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
 import com.festp.Chatter;
-import com.festp.Config;
+import com.festp.config.Config;
 import com.festp.utils.Link;
 import com.festp.utils.LinkUtils;
 import com.festp.utils.RawJsonBuilder;
@@ -35,12 +35,12 @@ public class WhisperHandler implements Listener
 		this.config = config;
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onServerCommand(ServerCommandEvent event)
 	{
 		onCommand(event, event.getSender(), "/" + event.getCommand());
 	}
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerCommand(PlayerCommandPreprocessEvent event)
 	{
 		onCommand(event, event.getPlayer(), event.getMessage());
@@ -48,7 +48,9 @@ public class WhisperHandler implements Listener
 	
 	private void onCommand(Cancellable event, CommandSender sender, String command)
 	{
-		if (event.isCancelled() && config.getIsVanillaWhisper())
+		if (!config.get(Config.Key.IS_WHISPER, true))
+			return;
+		if (event.isCancelled() && config.get(Config.Key.IS_VANILLA_WHISPER, true))
 			return;
 		
 		if (!isWhisperCommand(command))
@@ -57,6 +59,7 @@ public class WhisperHandler implements Listener
 		int[] indices = selectRecipients(command);
 		if (indices == null)
 			return;
+		// if is not vanilla, recipients list may be invalid
 		Player[] recipients = getRecipients(command.substring(indices[0], indices[1]), sender);
 		if (recipients == null || recipients.length == 0)
 			return;
@@ -70,7 +73,7 @@ public class WhisperHandler implements Listener
 			return;
 		
 		String nameFrom = sender.getName();
-		if (config.getIsVanillaWhisper())
+		if (config.get(Config.Key.IS_VANILLA_WHISPER, true))
 		{
 			String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
 			String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
@@ -135,6 +138,9 @@ public class WhisperHandler implements Listener
 
 	private static boolean isWhisperCommand(String command)
 	{
+		// EssentialsX Chat: aliases: [w,m,t,pm,emsg,epm,tell,etell,whisper,ewhisper]
+		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/plugin.yml)
+		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/config.yml)
 		return command.startsWith("/w") || command.startsWith("/msg") || command.startsWith("/tell");
 	}
 

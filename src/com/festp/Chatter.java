@@ -12,6 +12,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.festp.config.Config;
 import com.festp.utils.Link;
 import com.festp.utils.RawJsonBuilder;
 
@@ -27,10 +28,6 @@ public class Chatter
 	{
 		this.plugin = plugin;
 		this.config = config;
-	}
-	
-	public boolean getIsLinkUnderlined() {
-		return config.getIsLinkUnderlined();
 	}
 	
 	public void executeCommand(String command)
