@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.utils.Link;
-import com.festp.utils.RawJsonUtils;
+import com.festp.utils.RawJsonBuilder;
 
 public class Chatter
 {
@@ -21,10 +21,16 @@ public class Chatter
 	private static final String PLACEHOLDER_MESSAGE = "%2$s";
 	
 	private JavaPlugin plugin;
+	private Config config;
 	
-	public Chatter(JavaPlugin plugin)
+	public Chatter(JavaPlugin plugin, Config config)
 	{
 		this.plugin = plugin;
+		this.config = config;
+	}
+	
+	public boolean getIsLinkUnderlined() {
+		return config.getIsLinkUnderlined();
 	}
 	
 	public void executeCommand(String command)
@@ -76,7 +82,8 @@ public class Chatter
 		}
 		final boolean f_isEveryone = isEveryone;
 		
-		final StringBuilder command = new StringBuilder("tellraw @a [");
+		final RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings(), "tellraw @a ");
+        builder.startList();
 		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(format);
 		int prevEnd = 0;
@@ -85,7 +92,7 @@ public class Chatter
 	    {
 	        int start = matcher.start();
 	        int end = matcher.end();
-	        command.append(RawJsonUtils.tryWrap(format.substring(prevEnd, start)));
+	        builder.tryWrap(format.substring(prevEnd, start), "");
 	        
 	        int colorIndex = format.lastIndexOf('§', start);
 	        if (0 <= colorIndex && colorIndex + 2 <= end)
@@ -93,25 +100,24 @@ public class Chatter
 	        
 	        String placeholder = format.substring(start, end);
 	        if (placeholder.equals(PLACEHOLDER_NAME))
-	        	RawJsonUtils.appendSender(command, sender, "");
+	        	builder.appendSender(sender, "");
 	        if (placeholder.equals(PLACEHOLDER_MESSAGE))
-	        	RawJsonUtils.appendMessage(command, message, link, lastColor);
+	        	builder.appendMessage(message, link, lastColor);
 	        
 	        prevEnd = end;
 	    }
-        command.append(RawJsonUtils.tryWrap(format.substring(prevEnd)));
-		// extra comma - every function places it
-		command.deleteCharAt(command.length() - 1);
-		command.append("]");
+        builder.tryWrap(format.substring(prevEnd), "");
+        builder.endList();
 		
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 			@Override
 			public void run() {
 				if (f_isEveryone) {
-					Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString());
+					Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), builder.build());
 				}
 				else {
 					String prev = "@a";
+					StringBuilder command = builder.releaseStringBuilder();
 					int replaceStart = command.indexOf(prev);
 					for (Player p : recipients) {
 						String cur = p.getDisplayName();

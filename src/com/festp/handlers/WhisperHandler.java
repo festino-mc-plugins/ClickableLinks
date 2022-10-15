@@ -10,35 +10,37 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
 import com.festp.Chatter;
+import com.festp.Config;
 import com.festp.utils.Link;
 import com.festp.utils.LinkUtils;
-import com.festp.utils.RawJsonUtils;
+import com.festp.utils.RawJsonBuilder;
 
 public class WhisperHandler implements Listener
 {
 	private Chatter chatter;
-	private boolean isVanilla;
+	private Config config;
 	
 	private String color = ChatColor.GRAY.toString() + ChatColor.ITALIC.toString();
 	private String colorTags = "\"color\":\"gray\",\"italic\":\"true\",";
 	
-	public WhisperHandler(Chatter chatter, boolean isVanilla)
+	public WhisperHandler(Chatter chatter, Config config)
 	{
 		this.chatter = chatter;
-		this.isVanilla = isVanilla;
+		this.config = config;
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
 	public void onServerCommand(ServerCommandEvent event)
 	{
 		onCommand(event, event.getSender(), "/" + event.getCommand());
 	}
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
 	public void onPlayerCommand(PlayerCommandPreprocessEvent event)
 	{
 		onCommand(event, event.getPlayer(), event.getMessage());
@@ -46,6 +48,9 @@ public class WhisperHandler implements Listener
 	
 	private void onCommand(Cancellable event, CommandSender sender, String command)
 	{
+		if (event.isCancelled() && config.getIsVanillaWhisper())
+			return;
+		
 		if (!isWhisperCommand(command))
 			return;
 
@@ -65,39 +70,40 @@ public class WhisperHandler implements Listener
 			return;
 		
 		String nameFrom = sender.getName();
-		if (isVanilla)
+		if (config.getIsVanillaWhisper())
 		{
 			String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
 			String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
 			
-			StringBuilder modifiedMessage = new StringBuilder();
-			modifiedMessage.append("[");
-			RawJsonUtils.appendMessage(modifiedMessage, message, link, color);
-			modifiedMessage.deleteCharAt(modifiedMessage.length() - 1);
-			modifiedMessage.append("],");
-			
-			StringBuilder wrapNameFrom = new StringBuilder();
-			RawJsonUtils.appendSender(wrapNameFrom, sender, color);
+			RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
+			//builder.startList();
+			builder.appendMessage(message, link, color);
+			//builder.endList();
+			StringBuilder modifiedMessage = builder.releaseStringBuilder();
+			modifiedMessage.append(',');
+
+			builder = new RawJsonBuilder(config.getBuilderSettings());
+			builder.appendSender(sender, color);
+			StringBuilder wrapNameFrom = builder.releaseStringBuilder();
 			
 			for (Player recipient : recipients)
 			{
-				// lose vanilla translations
 				String nameTo = recipient.getDisplayName();
-				StringBuilder wrapNameTo = new StringBuilder();
-				RawJsonUtils.appendPlayer(wrapNameTo, recipient, color);
-				final StringBuilder from = new StringBuilder("tellraw ");
+				builder = new RawJsonBuilder(config.getBuilderSettings());
+				builder.appendPlayer(recipient, color);
+				StringBuilder wrapNameTo = builder.releaseStringBuilder();
+
+				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
 				from.append(nameFrom);
 				from.append(" ");
-				RawJsonUtils.appendTranslated(from, fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, colorTags);
-				from.deleteCharAt(from.length() - 1);
-				chatter.executeCommand(from.toString());
+				from.appendTranslated(fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, colorTags);
+				chatter.executeCommand(from.build());
 				
-				final StringBuilder to = new StringBuilder("tellraw ");
+				RawJsonBuilder to = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
 				to.append(nameTo);
 				to.append(" ");
-				RawJsonUtils.appendTranslated(to, toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, colorTags);
-				to.deleteCharAt(to.length() - 1);
-				chatter.executeCommand(to.toString());
+				to.appendTranslated(toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, colorTags);
+				chatter.executeCommand(to.build());
 			}
 			
 			event.setCancelled(true);
@@ -105,13 +111,14 @@ public class WhisperHandler implements Listener
 		else
 		{
 			// send extra message including the link list
-			final StringBuilder linkCommand = new StringBuilder("tellraw ");
-			linkCommand.append(nameFrom);
-			linkCommand.append(" [");
-			RawJsonUtils.appendJoinedLinks(linkCommand, message, link, color, ", ");
-			linkCommand.deleteCharAt(linkCommand.length() - 1);
-			linkCommand.append("]");
+			RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
+			builder.append(nameFrom);
+			builder.append(" ");
+			builder.appendJoinedLinks(message, link, color, ", ");
+			StringBuilder linkCommand = builder.releaseStringBuilder();
+			
 			chatter.executeCommand(linkCommand.toString());
+			
 			String prev = nameFrom;
 			int replaceStart = linkCommand.indexOf(prev);
 			for (Player recipient : recipients)

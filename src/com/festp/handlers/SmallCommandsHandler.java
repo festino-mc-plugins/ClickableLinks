@@ -3,6 +3,7 @@ package com.festp.handlers;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
@@ -22,13 +23,13 @@ public class SmallCommandsHandler implements Listener
 	{
 		this.chatter = chatter;
 	}
-	
-	@EventHandler
+
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onServerCommand(ServerCommandEvent event)
 	{
 		onCommand(event, event.getSender(), "/" + event.getCommand());
 	}
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerCommand(PlayerCommandPreprocessEvent event)
 	{
 		onCommand(event, event.getPlayer(), event.getMessage());
@@ -36,6 +37,9 @@ public class SmallCommandsHandler implements Listener
 
 	private void onCommand(Cancellable event, CommandSender sender, String command)
 	{
+		if (event.isCancelled())
+			return;
+		
 		if (isMeCommand(command))
 			onMeCommand(event, sender, command);
 		else if (isSayCommand(command))

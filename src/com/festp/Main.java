@@ -12,17 +12,20 @@ public class Main extends JavaPlugin
 	public void onEnable()
 	{
 		Logger.setLogger(getLogger());
+    	Config config = new Config(this);
+		config.loadConfig();
+		
+    	Chatter chatter = new Chatter(this, config);
+
     	PluginManager pm = getServer().getPluginManager();
-    	
-    	Chatter chatter = new Chatter(this);
     	
     	ChatHandler chatHandler = new ChatHandler(chatter);
     	pm.registerEvents(chatHandler, this);
     	
-    	WhisperHandler whisperHandler = new WhisperHandler(chatter, true);
-    	pm.registerEvents(whisperHandler, this);
-    	
     	SmallCommandsHandler smallHandler = new SmallCommandsHandler(chatter);
     	pm.registerEvents(smallHandler, this);
+    	
+    	WhisperHandler whisperHandler = new WhisperHandler(chatter, config);
+    	pm.registerEvents(whisperHandler, this);
 	}
 }
