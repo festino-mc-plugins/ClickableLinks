@@ -106,8 +106,8 @@ public class Chatter
 
 			prevEnd = end;
 		}
-	    builder.tryWrap(format.substring(prevEnd), "");
-        builder.endList();
+		builder.tryWrap(format.substring(prevEnd), "");
+		builder.endList();
 		
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 			@Override
