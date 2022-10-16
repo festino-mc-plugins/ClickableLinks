@@ -10,7 +10,7 @@ Other pages: [Spigot](https://www.spigotmc.org/resources/clickablelinks.105786/)
 Preserves format, e.g.
 * prefixes, suffixes and colors in LuckyPerms x Vault x EssentialsX Chat;
 * prefixes and colors in TownyChat;
-* vanilla whisper messages (like "You whisper to %s: %s").
+* client whisper messages ("You whisper to %s: %s" in English, "Вы прошептали %s: %s" in Russian, etc).
 
 Works on:  
 * player chat;  
