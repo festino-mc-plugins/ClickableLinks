@@ -3,7 +3,7 @@
 
 Other pages: [Spigot](https://www.spigotmc.org/resources/clickablelinks.105786/)  
 
-Note: Bukkit removed this feature in 1.19. Therefore, use this plugin only on Bukkit/Spigot/Paper 1.19+ servers, but on 1.18- it can also be useful due to link underlining and supported link formats.  
+<b>Note</b>: Bukkit removed this feature in [1.19.1](https://www.minecraft.net/ru-ru/article/minecraft-1-19-1-pre-release-6). Therefore, use this plugin only on Bukkit/Spigot/Paper 1.19+ servers, but on 1.18- it can also be useful due to link underlining and supported link formats.  
 
 Later, the original Bukkit code was found [here](https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/browse/src/main/java/org/bukkit/craftbukkit/util/CraftChatMessage.java). It has some issues: no URL-escaping, only latin letters in domains, invalid IPv4, TLD of length 2-4(no .museum or .vodka). These issues probably were inherited from the [vanilla parser 1.5.x-1.6.x](https://bugs.mojang.com/browse/MC-18898).  
   
