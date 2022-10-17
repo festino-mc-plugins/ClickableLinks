@@ -3,43 +3,39 @@ package com.festp.commands;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import com.festp.config.Config;
+import com.festp.config.LangConfig;
 
 public class LinksCommand implements CommandExecutor, TabCompleter
 {
 	private static final String PERMISSION_CONFIGURE = "clickablelinks.configure";
 	public static final String COMMAND = "links";
-
-	String message_noPerm = ChatColor.RED + "You must be an operator or have " + ChatColor.GRAY + PERMISSION_CONFIGURE + ChatColor.RED + " permission to perform this command.";
-	String message_noArgs = ChatColor.RED + "Usage: /links <option> [true|false]";
-	String message_arg0 = ChatColor.RED + "\"%s\" is an invalid option. Please follow tab-completion.";
-	String message_arg1 = ChatColor.RED + "\"%s\" is an invalid value. Please follow tab-completion.";
-	String message_getOk = ChatColor.GREEN + "Option %s is equal to %s.";
-	String message_setOk = ChatColor.GREEN + "Option %s was set to %s.";
+	private static final String SUBCOMMAND_RELOAD = "reload";
 	
 	Config config;
+	LangConfig lang;
 	
-	public LinksCommand(Config config)
+	public LinksCommand(Config config, LangConfig lang)
 	{
 		this.config = config;
+		this.lang = lang;
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String lbl, String[] args)
 	{
 		if (!sender.hasPermission(PERMISSION_CONFIGURE)) {
-			sender.sendMessage(message_noPerm);
+			sender.sendMessage(String.format(lang.command_noPerm, PERMISSION_CONFIGURE));
 			return false;
 		}
 		
 		if (args.length == 0) {
-			sender.sendMessage(message_noArgs);
+			sender.sendMessage(lang.command_noArgs);
 			return false;
 		}
 		Config.Key key = null;
@@ -51,22 +47,29 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 		if (key != null)
 		{
 			if (args.length == 1) {
-				sender.sendMessage(String.format(message_setOk, key.toString(), config.get(key)));
+				sender.sendMessage(String.format(lang.command_setOk, key.toString(), config.get(key)));
 				return true;
 			}
 			Boolean val = tryParseBoolean(args[1]);
 			if (val == null) {
-				sender.sendMessage(String.format(message_arg1, args[1]));
+				sender.sendMessage(String.format(lang.command_arg1_error, args[1]));
 				return false;
 			}
 			
 			config.set(key, val);
-			sender.sendMessage(String.format(message_setOk, key.toString(), val));
+			sender.sendMessage(String.format(lang.command_setOk, key.toString(), val));
 			
 			return true;
 		}
+		else if (args[0].equalsIgnoreCase(SUBCOMMAND_RELOAD))
+		{
+			config.load();
+			lang.load();
+			sender.sendMessage(lang.command_reloadOk);
+			return true;
+		}
 		
-		sender.sendMessage(String.format(message_arg0, args[0]));
+		sender.sendMessage(String.format(lang.command_arg0_error, args[0]));
 		
 		return false;
 	}
@@ -80,16 +83,21 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 			return options;
 		}
 		
-		if (args.length <= 1)
+		if (args.length == 1)
 		{
+			String arg = args[0].toLowerCase();
+			if (SUBCOMMAND_RELOAD.startsWith(arg))
+				options.add(SUBCOMMAND_RELOAD);
 			for (Config.Key k : Config.Key.values())
-				options.add(k.toString());
+				if (k.toString().startsWith(arg))
+					options.add(k.toString());
 		}
 		else if (args.length == 2)
 		{
+			String arg = args[0].toLowerCase();
 			boolean hasKey = false;
 			for (Config.Key k : Config.Key.values())
-				if (k.toString().equalsIgnoreCase(args[0])) {
+				if (k.toString().equals(arg)) {
 					hasKey = true;
 					break;
 				}

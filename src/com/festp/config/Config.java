@@ -13,12 +13,13 @@ import com.festp.utils.RawJsonBuilderSettings;
 public class Config implements IConfig
 {
 	private JavaPlugin plugin;
+	private LangConfig lang;
 	private MemoryConfiguration config;
 	private final HashMap<String, Object> map = new HashMap<>();
 	
-	public Config(JavaPlugin jp) {
+	public Config(JavaPlugin jp, LangConfig lang) {
 		this.plugin = jp;
-		this.config = jp.getConfig();
+		this.lang = lang;
 	}
 	
 	public RawJsonBuilderSettings getBuilderSettings() {
@@ -26,16 +27,22 @@ public class Config implements IConfig
 	}
 	
 	public void load() {
+		plugin.reloadConfig();
+		config = plugin.getConfig();
 		map.putAll(config.getValues(true));
-		Logger.info("Config reloaded.");
+		saveSilently();
+		Logger.info(lang.config_reload);
 	}
 
 	public void save() {
+		saveSilently();
+		Logger.info(lang.config_save);
+	}
+	public void saveSilently() {
 		for (Key key : Key.values()) {
 			config.set(key.name, get(key));
 		}
 		plugin.saveConfig();
-		Logger.info("Config successfully saved.");
 	}
 	
 	public void set(Key key, Object value) {
