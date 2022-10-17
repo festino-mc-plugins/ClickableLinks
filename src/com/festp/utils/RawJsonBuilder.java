@@ -68,6 +68,10 @@ public class RawJsonBuilder
 			if (lastIndex < link.beginIndex) {
 				tryWrap(message.substring(lastIndex, link.beginIndex), color);
 			}
+			else if (lastIndex == 0 && link.beginIndex == 0) {
+				// workaround for links at the beginning: they would convert all the plain text to that link
+				wrap("", color);
+			}
 			
 			appendLink(link, color);
 			
