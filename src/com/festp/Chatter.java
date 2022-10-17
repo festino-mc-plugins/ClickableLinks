@@ -94,7 +94,7 @@ public class Chatter
 			int end = matcher.end();
 			builder.tryWrap(format.substring(prevEnd, start), "");
 
-			int colorIndex = format.lastIndexOf('§', start);
+			int colorIndex = format.lastIndexOf(ChatColor.COLOR_CHAR, start);
 			if (0 <= colorIndex && colorIndex + 2 <= end)
 				lastColor = format.substring(colorIndex, colorIndex + 2);
 
