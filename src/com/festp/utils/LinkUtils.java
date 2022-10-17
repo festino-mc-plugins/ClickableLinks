@@ -3,7 +3,9 @@ package com.festp.utils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class LinkUtils {
 
@@ -44,7 +46,25 @@ public class LinkUtils {
 		}
 	}
 	
-	public static Link selectLink(String message, int indexBegin)
+	/** @return <b>null</b> if no links found */
+	public static Iterable<Link> findLinks(String message)
+	{
+		List<Link> links = new ArrayList<>();
+		
+		Link link = selectLink(message, 0);
+		while (link != null)
+		{
+			links.add(link);
+			link = selectLink(message, link.endIndex);
+		}
+		
+		if (links.size() == 0)
+			return null;
+		
+		return links;
+	}
+	
+	private static Link selectLink(String message, int indexBegin)
 	{
 		// starts with http://, www. or whatever, ends with .ru, .com, ... or /<anything>; also ip is valid
 		// parse [<protocol>://]<d>.<d>...<d>.<D>[/<no spaces>] - no spaces

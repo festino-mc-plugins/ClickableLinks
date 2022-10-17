@@ -66,18 +66,18 @@ public class WhisperHandler implements Listener
 		if (message == "")
 			return;
 		
-		Link link = LinkUtils.selectLink(message, 0);
-		if (link == null)
+		Iterable<Link> links = LinkUtils.findLinks(message);
+		if (links == null)
 			return;
 		
 		if (!config.get(Config.Key.IS_WHISPER_NEW_MESSAGE, false))
 		{
 			event.setCancelled(true);
-			chatter.sendWhisperMessage(sender, recipients, message, link, color);
+			chatter.sendWhisperMessage(sender, recipients, message, links, color);
 		}
 		else
 		{
-			chatter.sendOnlyLinks(sender, recipients, message, link, color);
+			chatter.sendOnlyLinks(sender, recipients, message, links, color);
 		}
 	}
 

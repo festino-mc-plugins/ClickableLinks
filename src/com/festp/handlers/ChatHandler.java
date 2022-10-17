@@ -22,11 +22,11 @@ public class ChatHandler implements Listener
 	{
 		String message = event.getMessage();
 		
-		Link link = LinkUtils.selectLink(message, 0);
-		if (link == null)
+		Iterable<Link> links = LinkUtils.findLinks(message);
+		if (links == null)
 			return;
 
-		chatter.sendFormatted(event.getRecipients(), event.getPlayer(), message, event.getFormat(), link, true);
+		chatter.sendFormatted(event.getRecipients(), event.getPlayer(), message, event.getFormat(), links, true);
 		event.setCancelled(true);
 	}
 }

@@ -52,11 +52,11 @@ public class SmallCommandsHandler implements Listener
 		if (message == "")
 			return;
 		
-		Link link = LinkUtils.selectLink(message, 0);
-		if (link == null)
+		Iterable<Link> links = LinkUtils.findLinks(message);
+		if (links == null)
 			return;
 		
-		chatter.sendFormatted(null, sender, message, "* %1$s %2$s", link, false);
+		chatter.sendFormatted(null, sender, message, "* %1$s %2$s", links, false);
 		event.setCancelled(true);
 	}
 
@@ -66,11 +66,11 @@ public class SmallCommandsHandler implements Listener
 		if (message == "")
 			return;
 		
-		Link link = LinkUtils.selectLink(message, 0);
-		if (link == null)
+		Iterable<Link> links = LinkUtils.findLinks(message);
+		if (links == null)
 			return;
 
-		chatter.sendFormatted(null, sender, message, "[%1$s] %2$s", link, false);
+		chatter.sendFormatted(null, sender, message, "[%1$s] %2$s", links, false);
 		event.setCancelled(true);
 	}
 

@@ -58,13 +58,12 @@ public class RawJsonBuilder
 		command.append("},");
 	}
 	
-	public void appendMessage(String message, Link firstLink, String color)
+	public void appendMessage(String message, Iterable<Link> links, String color)
 	{
 		startList();
         
 		int lastIndex = 0;
-		Link link = firstLink;
-		while (link != null)
+		for (Link link : links)
 		{
 			if (lastIndex < link.beginIndex) {
 				tryWrap(message.substring(lastIndex, link.beginIndex), color);
@@ -73,7 +72,6 @@ public class RawJsonBuilder
 			appendLink(link, color);
 			
 			lastIndex = link.endIndex;
-			link = LinkUtils.selectLink(message, lastIndex);
 		}
 		if (lastIndex < message.length()) {
 			tryWrap(message.substring(lastIndex), color);
@@ -82,14 +80,13 @@ public class RawJsonBuilder
 		endList();
 	}
 	
-	public void appendJoinedLinks(String message, Link firstLink, String color, String sep)
+	public void appendJoinedLinks(String message, Iterable<Link> links, String color, String sep)
 	{
 		startList();
         
-		Link link = firstLink;
 		boolean isFirst = true;
 		String wrappedSep = tryGetWrapped(sep, color);
-		while (link != null)
+		for (Link link : links)
 		{
 			if (isFirst) {
 				isFirst = false;
@@ -98,8 +95,6 @@ public class RawJsonBuilder
 				command.append(wrappedSep);
 			}
 			appendLink(link, color);
-			
-			link = LinkUtils.selectLink(message, link.endIndex);
 		}
 
 		endList();

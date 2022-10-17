@@ -60,7 +60,7 @@ public class Chatter
 	 * @param message is full message containing link(s)
 	 * @param format use "%1$s" for the sender name and "%2$s" for the message, i.e. "<%1$s> %2$s"
 	 * @param link is the first link found*/
-	public void sendFormatted(final Set<Player> recipients, CommandSender sender, String message, String format, Link link, boolean sendToConsole)
+	public void sendFormatted(final Set<Player> recipients, CommandSender sender, String message, String format, Iterable<Link> links, boolean sendToConsole)
 	{
 		if (sendToConsole)
 		{
@@ -102,7 +102,7 @@ public class Chatter
 			if (placeholder.equals(PLACEHOLDER_NAME))
 				builder.appendSender(sender, "");
 			if (placeholder.equals(PLACEHOLDER_MESSAGE))
-				builder.appendMessage(message, link, lastColor);
+				builder.appendMessage(message, links, lastColor);
 
 			prevEnd = end;
 		}
@@ -130,13 +130,13 @@ public class Chatter
 		});
 	}
 	
-	public void sendWhisperMessage(CommandSender sender, Player[] recipients, String message, Link link, String color)
+	public void sendWhisperMessage(CommandSender sender, Player[] recipients, String message, Iterable<Link> links, String color)
 	{
 		String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
 		String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
 		
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.appendMessage(message, link, color);
+		builder.appendMessage(message, links, color);
 		StringBuilder modifiedMessage = builder.releaseStringBuilder();
 
 		String nameFrom = Chatter.getName(sender);
@@ -168,13 +168,13 @@ public class Chatter
 		}
 	}
 	
-	public void sendOnlyLinks(CommandSender sender, Player[] recipients, String message, Link link, String color)
+	public void sendOnlyLinks(CommandSender sender, Player[] recipients, String message, Iterable<Link> links, String color)
 	{
 		String nameFrom = Chatter.getName(sender);
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
 		builder.append(nameFrom);
 		builder.append(" ");
-		builder.appendJoinedLinks(message, link, color, ", ");
+		builder.appendJoinedLinks(message, links, color, ", ");
 		StringBuilder linkCommand = builder.releaseStringBuilder();
 		
 		executeCommand(linkCommand.toString());
