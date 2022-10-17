@@ -13,9 +13,10 @@ import com.festp.config.Config;
 
 public class LinksCommand implements CommandExecutor, TabCompleter
 {
+	private static final String PERMISSION_CONFIGURE = "clickablelinks.configure";
 	public static final String COMMAND = "links";
 
-	String message_noOp = ChatColor.RED + "You must be an operator to perform this command.";
+	String message_noPerm = ChatColor.RED + "You must be an operator or have " + ChatColor.GRAY + PERMISSION_CONFIGURE + ChatColor.RED + " permission to perform this command.";
 	String message_noArgs = ChatColor.RED + "Usage: /links <option> [true|false]";
 	String message_arg0 = ChatColor.RED + "\"%s\" is an invalid option. Please follow tab-completion.";
 	String message_arg1 = ChatColor.RED + "\"%s\" is an invalid value. Please follow tab-completion.";
@@ -32,8 +33,8 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String lbl, String[] args)
 	{
-		if (!sender.isOp()) {
-			sender.sendMessage(message_noOp);
+		if (!sender.hasPermission(PERMISSION_CONFIGURE)) {
+			sender.sendMessage(message_noPerm);
 			return false;
 		}
 		
@@ -74,8 +75,8 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String lbl, String[] args)
 	{
 		List<String> options = new ArrayList<>();
-		
-		if (!sender.isOp()) {
+
+		if (!sender.hasPermission(PERMISSION_CONFIGURE)) {
 			return options;
 		}
 		
