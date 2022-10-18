@@ -9,13 +9,14 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
 import com.festp.Chatter;
+import com.festp.utils.CommandUtils;
 import com.festp.utils.Link;
 import com.festp.utils.LinkUtils;
 
 public class SmallCommandsHandler implements Listener
 {
-	private static final String ME_COMMAND = "/me";
-	private static final String SAY_COMMAND = "/say";
+	private static final String ME_COMMAND = "me";
+	private static final String SAY_COMMAND = "say";
 	
 	private Chatter chatter;
 	
@@ -40,15 +41,16 @@ public class SmallCommandsHandler implements Listener
 		if (event.isCancelled())
 			return;
 		
-		if (isMeCommand(command))
-			onMeCommand(event, sender, command);
-		else if (isSayCommand(command))
-			onSayCommand(event, sender, command);
+		String cmd = CommandUtils.getCommand(command);
+		String message = CommandUtils.getArgs(command);
+		if (isMeCommand(cmd))
+			onMeCommand(event, sender, message);
+		else if (isSayCommand(cmd))
+			onSayCommand(event, sender, message);
 	}
 
-	private void onMeCommand(Cancellable event, CommandSender sender, String command)
+	private void onMeCommand(Cancellable event, CommandSender sender, String message)
 	{
-		String message = command.substring(ME_COMMAND.length()).trim();
 		if (message == "")
 			return;
 		
@@ -60,9 +62,8 @@ public class SmallCommandsHandler implements Listener
 		event.setCancelled(true);
 	}
 
-	private void onSayCommand(Cancellable event, CommandSender sender, String command)
+	private void onSayCommand(Cancellable event, CommandSender sender, String message)
 	{
-		String message = command.substring(SAY_COMMAND.length()).trim();
 		if (message == "")
 			return;
 		
@@ -75,9 +76,9 @@ public class SmallCommandsHandler implements Listener
 	}
 
 	private boolean isMeCommand(String command) {
-		return command.startsWith(ME_COMMAND);
+		return command.equalsIgnoreCase(ME_COMMAND);
 	}
 	private boolean isSayCommand(String command) {
-		return command.startsWith(SAY_COMMAND);
+		return command.equalsIgnoreCase(SAY_COMMAND);
 	}
 }

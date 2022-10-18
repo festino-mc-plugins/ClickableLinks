@@ -17,6 +17,7 @@ import org.bukkit.event.server.ServerCommandEvent;
 
 import com.festp.Chatter;
 import com.festp.config.Config;
+import com.festp.utils.CommandUtils;
 import com.festp.utils.Link;
 import com.festp.utils.LinkUtils;
 
@@ -50,8 +51,9 @@ public class WhisperHandler implements Listener
 			return;
 		if (event.isCancelled() && !config.get(Config.Key.IS_WHISPER_NEW_MESSAGE, false))
 			return;
-		
-		if (!isWhisperCommand(command))
+
+		String cmd = CommandUtils.getCommand(command);
+		if (!isWhisperCommand(cmd))
 			return;
 
 		int[] indices = selectRecipients(command);
@@ -86,7 +88,7 @@ public class WhisperHandler implements Listener
 		// EssentialsX Chat: aliases: [w,m,t,pm,emsg,epm,tell,etell,whisper,ewhisper]
 		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/plugin.yml)
 		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/config.yml)
-		return command.startsWith("/w") || command.startsWith("/msg") || command.startsWith("/tell");
+		return command.startsWith("w") || command.startsWith("msg") || command.startsWith("tell");
 	}
 
 	private static int[] selectRecipients(String command)
