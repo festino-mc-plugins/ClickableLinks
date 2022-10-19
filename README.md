@@ -39,10 +39,10 @@ Preserves format, e.g.
 
 <h2>Configuration</h2>  
 
-<b>config.yml</b>
-* underline-links
-* do-whisper
-* whisper-new-message
+<b><ins>config.yml</ins></b>
+* <b>underline-links</b> - underline links or not
+* <b>do-whisper</b> - listen to whisper commands or ignore them
+* <b>whisper-new-message</b> - send new message on whisper or replace whisper messages
 
 <b>lang.yml</b>  
 Message templates for command feedback.
