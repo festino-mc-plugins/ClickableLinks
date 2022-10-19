@@ -29,16 +29,6 @@ public class Chatter
 		this.plugin = plugin;
 		this.config = config;
 	}
-	
-	public void executeCommand(String command)
-	{
-		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-			@Override
-			public void run() {
-				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
-			}
-		});
-	}
 
 	/**
 	 * Generates command for chat messages containing links<br>
@@ -60,7 +50,7 @@ public class Chatter
 	 * @param message is full message containing link(s)
 	 * @param format use "%1$s" for the sender name and "%2$s" for the message, i.e. "<%1$s> %2$s"
 	 * @param link is the first link found*/
-	public void sendFormatted(final Set<Player> recipients, CommandSender sender, String message, String format, Iterable<Link> links, boolean sendToConsole)
+	public void sendFormatted(Set<Player> recipients, CommandSender sender, String message, String format, Iterable<Link> links, boolean sendToConsole)
 	{
 		if (sendToConsole)
 		{
@@ -72,17 +62,12 @@ public class Chatter
 		if (recipients != null && recipients.isEmpty() || Bukkit.getOnlinePlayers().size() == 0)
 			return;
 		
-		boolean isEveryone = true;
-		if (recipients != null)
+		if (recipients == null)
 		{
-			Set<Player> onlinePlayers = new HashSet<Player>(Bukkit.getOnlinePlayers());
-			for (Player p : recipients)
-				onlinePlayers.remove(p);
-			isEveryone = onlinePlayers.isEmpty();
+			recipients = new HashSet<>(Bukkit.getOnlinePlayers());
 		}
-		final boolean f_isEveryone = isEveryone;
 		
-		final RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings(), "tellraw @a ");
+		final RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
 		builder.startList();
 		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(format);
@@ -108,26 +93,11 @@ public class Chatter
 		}
 		builder.tryWrap(format.substring(prevEnd), "");
 		builder.endList();
-		
-		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-			@Override
-			public void run() {
-				if (f_isEveryone) {
-					Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), builder.build());
-				}
-				else {
-					String prev = "@a";
-					StringBuilder command = builder.releaseStringBuilder();
-					int replaceStart = command.indexOf(prev);
-					for (Player p : recipients) {
-						String cur = p.getPlayerListName();
-						command.replace(replaceStart, replaceStart + prev.length(), cur);
-						Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString());
-						prev = cur;
-					}
-				}
-			}
-		});
+
+		String rawJson = builder.releaseStringBuilder().toString();
+		for (Player p : recipients) {
+			sendRawJson(p, rawJson);
+		}
 	}
 	
 	public void sendWhisperMessage(CommandSender sender, Player[] recipients, String message, Iterable<Link> links, String color)
@@ -139,56 +109,43 @@ public class Chatter
 		builder.appendMessage(message, links, color);
 		StringBuilder modifiedMessage = builder.releaseStringBuilder();
 
-		String nameFrom = Chatter.getName(sender);
 		builder = new RawJsonBuilder(config.getBuilderSettings());
 		builder.appendSender(sender, color);
 		StringBuilder wrapNameFrom = builder.releaseStringBuilder();
 		
 		for (Player recipient : recipients)
 		{
-			String nameTo = recipient.getPlayerListName();
 			if (sender instanceof Player)
 			{
 				builder = new RawJsonBuilder(config.getBuilderSettings());
 				builder.appendPlayer(recipient, color);
 				StringBuilder wrapNameTo = builder.releaseStringBuilder();
 				
-				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
-				from.append(nameFrom);
-				from.append(" ");
+				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings());
 				from.appendTranslated(fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, color);
-				executeCommand(from.build());
+				sendRawJson((Player)sender, from.build());
 			}
 			
-			RawJsonBuilder to = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
-			to.append(nameTo);
-			to.append(" ");
+			RawJsonBuilder to = new RawJsonBuilder(config.getBuilderSettings());
 			to.appendTranslated(toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, color);
-			executeCommand(to.build());
+			sendRawJson(recipient, to.build());
 		}
 	}
 	
 	public void sendOnlyLinks(CommandSender sender, Player[] recipients, String message, Iterable<Link> links, String color)
 	{
-		String nameFrom = Chatter.getName(sender);
-		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings(), "tellraw ");
-		builder.append(nameFrom);
-		builder.append(" ");
+		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
 		builder.appendJoinedLinks(message, links, color, ", ");
-		StringBuilder linkCommand = builder.releaseStringBuilder();
+		String linkCommand = builder.build();
 		
-		executeCommand(linkCommand.toString());
+		if (sender instanceof Player)
+			sendRawJson((Player)sender, linkCommand);
 		
-		String prev = nameFrom;
-		int replaceStart = linkCommand.indexOf(prev);
 		for (Player recipient : recipients)
 		{
 			if (recipient == sender)
 				continue;
-			String cur = recipient.getPlayerListName();
-			linkCommand.replace(replaceStart, replaceStart + prev.length(), cur);
-			executeCommand(linkCommand.toString());
-			prev = cur;
+			sendRawJson(recipient, linkCommand);
 		}
 	}
 	
@@ -199,5 +156,19 @@ public class Chatter
 		if (sender instanceof ConsoleCommandSender)
 			return "Server";
 		return sender.getName();
+	}
+	
+	private void sendRawJson(Player player, String rawJsonMessage)
+	{
+		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+			@Override
+			public void run() {
+				StringBuilder command = new StringBuilder("tellraw ");
+				command.append(getName(player));
+				command.append(' ');
+				command.append(rawJsonMessage);
+				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString());
+			}
+		});
 	}
 }
