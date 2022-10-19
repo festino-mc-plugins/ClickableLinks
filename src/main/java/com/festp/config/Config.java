@@ -1,5 +1,6 @@
 package com.festp.config;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.Logger;
+import com.festp.utils.FileUtils;
 import com.festp.utils.RawJsonBuilderSettings;
 
 public class Config implements IConfig
@@ -27,6 +29,9 @@ public class Config implements IConfig
 	}
 	
 	public void load() {
+		File configFile = new File(plugin.getDataFolder(), "config.yml");
+		if (!configFile.exists())
+			FileUtils.copyFileFromResource(configFile, "config.yml");
 		plugin.reloadConfig();
 		config = plugin.getConfig();
 		map.putAll(config.getValues(true));
@@ -106,8 +111,8 @@ public class Config implements IConfig
 	
 	public enum Key implements IConfig.Key {
 		IS_LINK_UNDERLINED("underline-links", true),
-		IS_WHISPER("do-whisper", true),
-		IS_WHISPER_NEW_MESSAGE("whisper-new-message", false);
+		LISTEN_TO_WHISPER("do-whisper", true),
+		WHISPER_NEW_MESSAGE("whisper-new-message", false);
 		
 		private final String name;
 		private final Object defaultValue;

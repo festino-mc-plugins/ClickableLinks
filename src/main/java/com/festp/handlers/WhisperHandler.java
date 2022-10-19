@@ -47,9 +47,9 @@ public class WhisperHandler implements Listener
 	
 	private void onCommand(Cancellable event, CommandSender sender, String command)
 	{
-		if (!config.get(Config.Key.IS_WHISPER, true))
+		if (!config.get(Config.Key.LISTEN_TO_WHISPER, true))
 			return;
-		if (event.isCancelled() && !config.get(Config.Key.IS_WHISPER_NEW_MESSAGE, false))
+		if (event.isCancelled() && !config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
 			return;
 
 		String cmd = CommandUtils.getCommand(command);
@@ -72,7 +72,7 @@ public class WhisperHandler implements Listener
 		if (links == null)
 			return;
 		
-		if (!config.get(Config.Key.IS_WHISPER_NEW_MESSAGE, false))
+		if (!config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
 		{
 			event.setCancelled(true);
 			chatter.sendWhisperMessage(sender, recipients, message, links, color);
@@ -88,7 +88,7 @@ public class WhisperHandler implements Listener
 		// EssentialsX Chat: aliases: [w,m,t,pm,emsg,epm,tell,etell,whisper,ewhisper]
 		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/plugin.yml)
 		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/config.yml)
-		return command.startsWith("w") || command.startsWith("msg") || command.startsWith("tell");
+		return command.equalsIgnoreCase("w") || command.equalsIgnoreCase("msg") || command.equalsIgnoreCase("tell");
 	}
 
 	private static int[] selectRecipients(String command)
