@@ -47,7 +47,7 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 		if (key != null)
 		{
 			if (args.length == 1) {
-				sender.sendMessage(String.format(lang.command_setOk, key.toString(), config.get(key)));
+				sender.sendMessage(String.format(lang.command_getOk, key.toString(), config.get(key)));
 				return true;
 			}
 			Boolean val = tryParseBoolean(args[1]);
