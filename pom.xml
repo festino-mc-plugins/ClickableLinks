@@ -1,18 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>LinkRestorer</groupId>
-  <artifactId>LinkRestorer</artifactId>
-  <version>1.0.0</version>
+  <groupId>ClickableLinks</groupId>
+  <artifactId>ClickableLinks</artifactId>
+  <version>1.1.1</version>
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <resources>
+    <defaultGoal>clean package</defaultGoal>
+    
+	<resources>
       <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
+        <directory>.</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>LICENSE</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources/</directory>
+        <filtering>true</filtering>
       </resource>
     </resources>
+
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
