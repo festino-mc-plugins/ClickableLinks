@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
 import com.festp.Chatter;
+import com.festp.Logger;
 import com.festp.config.Config;
 import com.festp.utils.CommandUtils;
 import com.festp.utils.Link;
@@ -55,14 +56,18 @@ public class WhisperHandler implements Listener
 		String cmd = CommandUtils.getCommand(command);
 		if (!isWhisperCommand(cmd))
 			return;
+		boolean isLogging = config.get(Config.Key.LOG_DEBUG, false);
+		if (isLogging) Logger.info("Handling whisper event... (event was " + (event.isCancelled() ? "" : "not ") + "cancelled)");
 
 		int[] indices = selectRecipients(command);
 		if (indices == null)
 			return;
+		if (isLogging) Logger.info("Got recipient indices...");
 		// if is not vanilla, recipients list may be invalid
 		Player[] recipients = getRecipients(command.substring(indices[0], indices[1]), sender);
 		if (recipients == null || recipients.length == 0)
 			return;
+		if (isLogging) Logger.info("Got " + recipients.length + " recipients...");
 		
 		String message = command.substring(indices[1]).trim();
 		if (message == "")
@@ -71,6 +76,7 @@ public class WhisperHandler implements Listener
 		Iterable<Link> links = LinkUtils.findLinks(message);
 		if (links == null)
 			return;
+		if (isLogging) Logger.info("Got links, sending messages...");
 		
 		if (!config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
 		{

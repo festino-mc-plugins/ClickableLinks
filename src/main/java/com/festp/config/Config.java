@@ -112,7 +112,8 @@ public class Config implements IConfig
 	public enum Key implements IConfig.Key {
 		IS_LINK_UNDERLINED("underline-links", true),
 		LISTEN_TO_WHISPER("do-whisper", true),
-		WHISPER_NEW_MESSAGE("whisper-new-message", false);
+		WHISPER_NEW_MESSAGE("whisper-new-message", false),
+		LOG_DEBUG("log-debug-info", false);
 		
 		private final String name;
 		private final Object defaultValue;
