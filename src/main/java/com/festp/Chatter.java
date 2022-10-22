@@ -54,7 +54,7 @@ public class Chatter
 	{
 		if (sendToConsole)
 		{
-			String consoleMessage = format.replace(PLACEHOLDER_NAME, getName(sender)).replace(PLACEHOLDER_MESSAGE, message);
+			String consoleMessage = format.replace(PLACEHOLDER_NAME, getDisplayName(sender)).replace(PLACEHOLDER_MESSAGE, message);
 			Bukkit.getConsoleSender().sendMessage(consoleMessage);
 		}
 		
@@ -149,10 +149,10 @@ public class Chatter
 		}
 	}
 	
-	public static String getName(CommandSender sender)
+	public static String getDisplayName(CommandSender sender)
 	{
 		if (sender instanceof Player)
-			return ((Player)sender).getPlayerListName();
+			return ((Player)sender).getDisplayName();
 		if (sender instanceof ConsoleCommandSender)
 			return "Server";
 		return sender.getName();
@@ -164,7 +164,7 @@ public class Chatter
 			@Override
 			public void run() {
 				StringBuilder command = new StringBuilder("tellraw ");
-				command.append(getName(player));
+				command.append(player.getName());
 				command.append(' ');
 				command.append(rawJsonMessage);
 				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString());

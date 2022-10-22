@@ -44,7 +44,7 @@ public class RawJsonBuilder
 		if (sender instanceof Player)
 			appendPlayer((Player)sender, color);
 		else {
-			String name = Chatter.getName(sender);
+			String name = Chatter.getDisplayName(sender);
 			wrap(name, color);
 		}
 	}

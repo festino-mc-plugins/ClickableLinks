@@ -157,7 +157,7 @@ public class WhisperHandler implements Listener
 	private static Player tryGetPlayer(String name)
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
-			if (p.getPlayerListName().equals(name))
+			if (p.getName().equals(name))
 				return p;
 		return null;
 	}
