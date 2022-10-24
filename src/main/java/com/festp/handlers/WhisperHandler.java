@@ -62,7 +62,7 @@ public class WhisperHandler implements Listener
 		int[] indices = selectRecipients(command);
 		if (indices == null)
 			return;
-		if (isLogging) Logger.info("Got recipient indices...");
+		if (isLogging) Logger.info("Got recipient indices... [" + indices[0] + ":" + indices[1] + "]");
 		// if is not vanilla, recipients list may be invalid
 		Player[] recipients = getRecipients(command.substring(indices[0], indices[1]), sender);
 		if (recipients == null || recipients.length == 0)
