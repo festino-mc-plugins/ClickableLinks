@@ -43,6 +43,7 @@ Preserves format, e.g.
 * <b>underline-links</b> - underline links or not
 * <b>do-whisper</b> - listen to whisper commands or ignore them
 * <b>whisper-new-message</b> - send new message on whisper or replace whisper messages
+* <b>log-debug-info</b> - the whisper parser will print its details to the console
 
 <b>lang.yml</b>  
 Message templates for command feedback.
