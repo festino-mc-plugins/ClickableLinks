@@ -85,7 +85,7 @@ public class Chatter
 
 			String placeholder = format.substring(start, end);
 			if (placeholder.equals(PLACEHOLDER_NAME))
-				builder.appendSender(sender, "");
+				builder.appendSender(sender, "", true);
 			if (placeholder.equals(PLACEHOLDER_MESSAGE))
 				builder.appendMessage(message, links, lastColor);
 
@@ -110,7 +110,7 @@ public class Chatter
 		StringBuilder modifiedMessage = builder.releaseStringBuilder();
 
 		builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.appendSender(sender, color);
+		builder.appendSender(sender, color, false);
 		StringBuilder wrapNameFrom = builder.releaseStringBuilder();
 		
 		for (Player recipient : recipients)
@@ -118,7 +118,7 @@ public class Chatter
 			if (sender instanceof Player)
 			{
 				builder = new RawJsonBuilder(config.getBuilderSettings());
-				builder.appendPlayer(recipient, color);
+				builder.appendPlayer(recipient, color, false);
 				StringBuilder wrapNameTo = builder.releaseStringBuilder();
 				
 				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings());

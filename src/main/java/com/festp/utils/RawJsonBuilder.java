@@ -39,18 +39,22 @@ public class RawJsonBuilder
 		return "{\"text\":\"" + color + str + "\"},";
 	}
 
-	public void appendSender(CommandSender sender, String color)
+	public void appendSender(CommandSender sender, String color, boolean decorating)
 	{
 		if (sender instanceof Player)
-			appendPlayer((Player)sender, color);
+			appendPlayer((Player)sender, color, decorating);
 		else {
 			String name = Chatter.getDisplayName(sender);
 			wrap(name, color);
 		}
 	}
-	public void appendPlayer(Player player, String color)
+	public void appendPlayer(Player player, String color, boolean decorating)
 	{
-		String nickname = player.getDisplayName();
+		String nickname;
+		if (decorating)
+			nickname = Chatter.getDisplayName(player);
+		else
+			nickname = player.getName();
 		String uuid = player.getUniqueId().toString();
 		command.append("{\"text\":\"" + color + nickname + "\",");
 		command.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + nickname + "\\nType: Player\\n" + uuid + "\"},");
