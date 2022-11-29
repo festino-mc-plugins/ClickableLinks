@@ -23,6 +23,7 @@ Can deal with:
 [https://www.youtube.com/c/モエソデmoesode/videos](https://github.com/festino-mc-plugins/LinkRestorer/edit/main/README.md#features)  
 * Cyrillic in domain  
 [https://стопкоронавирус.рф](https://github.com/festino-mc-plugins/LinkRestorer/edit/main/README.md#features)  
+[https://www.лекарство.net](https://github.com/festino-mc-plugins/LinkRestorer/edit/main/README.md#features)  
 * IPv4  
 [1.2.3.4](https://github.com/festino-mc-plugins/LinkRestorer/edit/main/README.md#features)  
 * Invalid IPv4  
