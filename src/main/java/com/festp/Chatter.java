@@ -85,7 +85,7 @@ public class Chatter
 
 			String placeholder = format.substring(start, end);
 			if (placeholder.equals(PLACEHOLDER_NAME))
-				builder.appendSender(sender, "", true);
+				builder.appendSender(sender, lastColor, true);
 			if (placeholder.equals(PLACEHOLDER_MESSAGE))
 				builder.appendMessage(message, links, lastColor);
 
