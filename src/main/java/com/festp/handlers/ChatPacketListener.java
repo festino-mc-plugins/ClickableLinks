@@ -92,21 +92,33 @@ public class ChatPacketListener extends PacketAdapter
 		if (sent)
 			event.setCancelled(true);
     }
-    
-    private void onSystemChatMessage(PacketEvent event)
-    {
-    	if (event.isCancelled())
-    		return;
 
-    	String rawJson = event.getPacket().getStrings().read(0);
-    	ParseResult parseResult = parseMessage(rawJson);
-    	if (parseResult == null)
-    		return;
+	private void onSystemChatMessage(PacketEvent event)
+	{
+		if (event.isCancelled())
+			return;
+
+		// old versions
+		String rawJson = event.getPacket().getStrings().readSafely(0);
+
+	    // new versions
+	    if (rawJson == null || rawJson.isEmpty()) {
+	        com.comphenix.protocol.wrappers.WrappedChatComponent component = event.getPacket().getChatComponents().readSafely(0);
+			if (component != null)
+	            rawJson = component.getJson();
+	    }
+	
+	    if (rawJson == null || rawJson.isEmpty())
+	        return;
+
+		ParseResult parseResult = parseMessage(rawJson);
+		if (parseResult == null)
+			return;
 
 		boolean isLogging = config.get(Config.Key.LOG_DEBUG, false);
-    	if (isLogging) Logger.info("Processing system message from " + parseResult.messageInfo.sender.getName() + " to " + event.getPlayer().getName());
+		if (isLogging) Logger.info("Processing system message from " + parseResult.messageInfo.sender.getName() + " to " + event.getPlayer().getName());
 		boolean sent = chatter.sendIntercepted(parseResult.messageInfo.sender, event.getPlayer(),
-											   parseResult.formatComponents, parseResult.messagePositions, parseResult.messageComponents);
+				parseResult.formatComponents, parseResult.messagePositions, parseResult.messageComponents);
 		if (sent)
 			event.setCancelled(true);
 	}
