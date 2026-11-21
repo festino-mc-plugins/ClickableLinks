@@ -98,15 +98,18 @@ public class ChatPacketListener extends PacketAdapter
 		if (event.isCancelled())
 			return;
 
-		// 1. Получаем чат-компонент из пакета вместо сырой строки
-		com.comphenix.protocol.wrappers.WrappedChatComponent component = event.getPacket().getChatComponents().read(0);
-		if (component == null)
-			return;
+		// old versions
+		String rawJson = event.getPacket().getStrings().readSafely(0);
 
-		// 2. Достаем из него чистый JSON-текст сообщения
-		String rawJson = component.getJson();
-		if (rawJson == null || rawJson.isEmpty())
-			return;
+	    // new versions
+	    if (rawJson == null || rawJson.isEmpty()) {
+	        com.comphenix.protocol.wrappers.WrappedChatComponent component = event.getPacket().getChatComponents().readSafely(0);
+			if (component != null)
+	            rawJson = component.getJson();
+	    }
+	
+	    if (rawJson == null || rawJson.isEmpty())
+	        return;
 
 		ParseResult parseResult = parseMessage(rawJson);
 		if (parseResult == null)
